@@ -20,7 +20,7 @@ class RunCmdException(Exception):
 class TestLib:
     def __init__(self, ctl, aliases):
         self._ctl = ctl
-        self._ipv = aliases["ipv"]
+        self._ipv = "both" # aliases["ipv"]
         self._mtu = int(aliases["mtu"])
         if "netperf_duration" in aliases:
             self._netperf_duration = int(aliases["netperf_duration"])
