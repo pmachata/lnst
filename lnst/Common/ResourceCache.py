@@ -127,7 +127,11 @@ class ResourceCache(object):
 
     def del_cache_entry(self, entry_hash):
         if entry_hash in self._entries:
-            shutil.rmtree("%s/%s" % (self._root, entry_hash))
+            try:
+                shutil.rmtree("%s/%s" % (self._root, entry_hash))
+            except OSError as e:
+                if e.errno != 2:
+                    raise
             del self._entries[entry_hash]
             self._save_index()
 
