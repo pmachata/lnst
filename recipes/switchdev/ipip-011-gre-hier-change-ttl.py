@@ -79,7 +79,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             logging.info("--- TTL inherit")
 
-            sleep(15)
+            sleep(30)
             ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g,
                       count=25, ttl=3, fail_expected=True)
 

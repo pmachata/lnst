@@ -50,7 +50,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
                 sleep(5)
                 d.set_addresses(["1.2.3.4/32"])
-                sleep(15)
+                sleep(30)
                 ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
                           ipv6=True)
                 ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
@@ -66,7 +66,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
                 with encap_route(sw, vrf_o, 2, g, ip=ipv4), \
                      encap_route(sw, vrf_o, 2, g, ip=ipv6):
-                    sleep(15)
+                    sleep(30)
                     ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
                               ipv6=True)
                     ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
@@ -138,7 +138,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                      ikey=2222, okey=1111) as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(15)
+                sleep(30)
                 ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
 
             # - Slow path: non-inherit TOS.
@@ -150,7 +150,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                      remote_ip="1.2.3.5") as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(15)
+                sleep(30)
                 ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g,
                           require_fastpath=False)
 
@@ -164,7 +164,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                      key=3333, csum=True) as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(15)
+                sleep(30)
                 ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g,
                           require_fastpath=False)
 

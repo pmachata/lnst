@@ -45,7 +45,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                       remote_ip="1.2.3.5") as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(15)
+                sleep(30)
                 ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
 
 do_task(ctl, [ctl.get_host("machine1"),

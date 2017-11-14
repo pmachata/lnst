@@ -109,7 +109,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             ping_test(tl, m1, sw, ipv4(test_ip(4, 33, [])), m1_if1_20, None,
                       count=25, fail_expected=tun2_ipv4_fail)
 
-        sleep(15)
+        sleep(30)
         quick_test(False, False, True, True)
 
         sw.run("ip l s dev %s master %s" % (sd.get_devname(), svu2))
