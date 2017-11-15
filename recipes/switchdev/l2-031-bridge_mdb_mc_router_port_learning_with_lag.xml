@@ -1,0 +1,90 @@
+<lnstrecipe xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="default_aliases.xml" />
+    <network>
+        <host id="machine1">
+            <interfaces>
+                <eth id="if_1" label="A" />
+                <eth id="if3" label="E" />
+                <bond id="if1">
+                    <options>
+                        <option name="mode" value="802.3ad"/>
+                    </options>
+                    <slaves>
+                        <slave id="if_1"/>
+                        <slave id="if3"/>
+                    </slaves>
+                </bond>
+                <veth_pair>
+                    <veth id="veth0"/>
+                    <veth id="veth1" netns="nsif1">
+                    </veth>
+                </veth_pair>
+                <bridge id="brif1">
+                    <slaves>
+                        <slave id="if1"/>
+                        <slave id="veth0"/>
+                    </slaves>
+                </bridge>
+                <eth id="if2" label="B" />
+                <veth_pair>
+                    <veth id="veth2"/>
+                    <veth id="veth3" netns="nsif2">
+                    </veth>
+                </veth_pair>
+                <bridge id="brif2">
+                    <slaves>
+                        <slave id="if2"/>
+                        <slave id="veth2"/>
+                    </slaves>
+                </bridge>
+            </interfaces>
+        </host>
+        <host id="machine2">
+            <interfaces>
+                <eth id="if1" label="C" />
+                <veth_pair>
+                    <veth id="veth0"/>
+                    <veth id="veth1" netns="nsif1">
+                    </veth>
+                </veth_pair>
+                <bridge id="brif1">
+                    <slaves>
+                        <slave id="if1"/>
+                        <slave id="veth0"/>
+                    </slaves>
+                </bridge>
+                <eth id="if2" label="D" />
+                <veth_pair>
+                    <veth id="veth2"/>
+                    <veth id="veth3" netns="nsif2">
+                    </veth>
+                </veth_pair>
+                <bridge id="brif2">
+                    <slaves>
+                        <slave id="if2"/>
+                        <slave id="veth2"/>
+                    </slaves>
+                </bridge>
+            </interfaces>
+        </host>
+        <host id="switch">
+            <interfaces>
+                <eth id="if_1" label="A" />
+                <eth id="if2" label="B" />
+                <eth id="if_5" label="E" />
+                <eth id="if3" label="C" />
+                <eth id="if4" label="D" />
+                <bond id="if1">
+                    <options>
+                        <option name="mode" value="802.3ad"/>
+                    </options>
+                    <slaves>
+                        <slave id="if_1"/>
+                        <slave id="if_5"/>
+                    </slaves>
+                </bond>
+            </interfaces>
+        </host>
+    </network>
+    <task python="l2-024-bridge_mdb_mc_router_port_learning.py" />
+</lnstrecipe>

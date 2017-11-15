@@ -1,0 +1,5 @@
+<lnstrecipe xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="default_aliases.xml" />
+    <xi:include href="l2-mcast_lag_topology.xml" />
+    <task python="l2-020-bridge_mdb.py" />
+</lnstrecipe>
