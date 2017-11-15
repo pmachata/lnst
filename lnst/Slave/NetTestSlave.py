@@ -917,6 +917,24 @@ class SlaveMethods:
         brt = BridgeTool(dev.get_name())
         return brt.get_fdbs()
 
+    def add_br_mdb(self, if_id, br_mdb_info):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if not dev:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        brt = BridgeTool(dev.get_name())
+        brt.add_mdb(br_mdb_info)
+        return True
+
+    def del_br_mdb(self, if_id, br_mdb_info):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if not dev:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        brt = BridgeTool(dev.get_name())
+        brt.del_mdb(br_mdb_info)
+        return True
+
     def set_br_learning(self, if_id, br_learning_info):
         dev = self._if_manager.get_mapped_device(if_id)
         if not dev:
