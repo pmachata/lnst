@@ -32,7 +32,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                              config=team_config)
 
     sw.create_bridge(slaves=[sw_lag1, sw_lag2], options={"vlan_filtering": 1,
-                                                         "multicast_querier": 1})
+                                                         "multicast_snooping": 0})
 
     sleep(30)
 

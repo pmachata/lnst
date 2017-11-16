@@ -26,7 +26,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_lag2 = sw.create_bond(slaves=[sw_if3, sw_if4], options=bond_options)
 
     sw.create_bridge(slaves=[sw_lag1, sw_lag2], options={"vlan_filtering": 1,
-                                                         "multicast_querier": 1})
+                                                         "multicast_snooping": 0})
 
     sleep(30)
 
