@@ -12,7 +12,7 @@ from lnst.Controller.Task import ctl
 from TestLib import TestLib, vrf, dummy, gre
 from ipip_common import ping_test, encap_route, \
                         add_forward_route, connect_host_ifaces, \
-                        test_ip, ipv4, ipv6, refresh_addrs
+                        onet1_ip, onet2_ip, unet_ip, ipv4, ipv6, refresh_addrs
 from time import sleep
 import logging
 
@@ -23,7 +23,7 @@ def do_task(ctl, hosts, ifaces, aliases):
      sw_if1_10, sw_if1_20,
      sw_if2_10, sw_if2_20) = ifaces
 
-    m2_if1_10.add_nhs_route("1.2.3.4/32", [ipv4(test_ip(99, 1, []))])
+    m2_if1_10.add_nhs_route("1.2.3.4/32", [ipv4(unet_ip(ctl, 1, []))])
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
@@ -31,7 +31,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     logging.info("=== Decap-only flow tests")
     logging.info("--- default VRF")
     with encap_route(m2, vrf_None, 1, "gre1",
-                     ip=ipv4, src=ipv4(test_ip(2, 33, []))), \
+                     ip=ipv4, src=ipv4(onet2_ip(ctl, 33, []))), \
          encap_route(m2, vrf_None, 1, "gre1", ip=ipv6), \
          dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d, \
          gre(sw, None, vrf_None,
@@ -42,14 +42,15 @@ def do_task(ctl, hosts, ifaces, aliases):
         add_forward_route(sw, vrf_None, "1.2.3.5")
         sleep(30)
 
-        ping_test(tl, m2, sw, ipv6(test_ip(1, 33, [])), m2_if1_10, g, ipv6=True)
-        ping_test(tl, m2, sw, ipv4(test_ip(1, 33, [])), m2_if1_10, g)
+        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                  ipv6=True)
+        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
 
     with vrf(sw) as vrf_u, \
          vrf(sw) as vrf_o, \
          dummy(sw, vrf_u, ip=["1.2.3.4/32"]) as d, \
          encap_route(m2, vrf_None, 1, "gre1",
-                     ip=ipv4, src=ipv4(test_ip(2, 33, []))), \
+                     ip=ipv4, src=ipv4(onet2_ip(ctl, 33, []))), \
          encap_route(m2, vrf_None, 1, "gre1", ip=ipv6):
 
         connect_host_ifaces(sw, sw_if1_10, vrf_o, sw_if2_10, vrf_u)
@@ -64,18 +65,20 @@ def do_task(ctl, hosts, ifaces, aliases):
             logging.info("--- hierarchical configuration")
             sleep(30)
 
-            ping_test(tl, m2, sw, ipv6(test_ip(1, 33, [])), m2_if1_10, g, ipv6=True)
-            ping_test(tl, m2, sw, ipv4(test_ip(1, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                      ipv6=True)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
 
-            # Make sure that downing an underlay device doesn't make the decap flow
-            # stop working. There is a complementary test in ipip-010 to test that
-            # encap stops working.
+            # Make sure that downing an underlay device doesn't make the decap
+            # flow stop working. There is a complementary test in ipip-010 to
+            # test that encap stops working.
             logging.info("--- set an underlay down")
             d.set_link_down()
             sleep(5)
 
-            ping_test(tl, m2, sw, ipv6(test_ip(1, 33, [])), m2_if1_10, g, ipv6=True)
-            ping_test(tl, m2, sw, ipv4(test_ip(1, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                      ipv6=True)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
 
         # Make sure that when a newly-created tunnel has a down underlay, decap
         # still works. There's a complementary test in ipip-010 to test that
@@ -88,8 +91,9 @@ def do_task(ctl, hosts, ifaces, aliases):
                  local_ip="1.2.3.4",
                  remote_ip="1.2.3.5") as g:
 
-            ping_test(tl, m2, sw, ipv6(test_ip(1, 33, [])), m2_if1_10, g, ipv6=True)
-            ping_test(tl, m2, sw, ipv4(test_ip(1, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                      ipv6=True)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),

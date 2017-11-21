@@ -12,7 +12,7 @@ from lnst.Controller.Task import ctl
 from TestLib import TestLib, vrf, dummy, gre
 from ipip_common import ping_test, encap_route, \
                         add_forward_route, connect_host_ifaces, \
-                        test_ip, ipv4, ipv6
+                        onet1_ip, onet2_ip, unet_ip, ipv4, ipv6
 from time import sleep
 import logging
 
@@ -20,9 +20,9 @@ def do_task(ctl, hosts, ifaces, aliases):
     m1, m2, sw = hosts
     m1_if1, m2_if1, sw_if1, sw_if2 = ifaces
 
-    m1_if1.add_nhs_route(ipv4(test_ip(2, 0)), [ipv4(test_ip(1, 1, []))])
-    m1_if1.add_nhs_route(ipv6(test_ip(2, 0)), [ipv6(test_ip(1, 1, []))])
-    m2_if1.add_nhs_route("1.2.3.4/32", [ipv4(test_ip(99, 1, []))])
+    m1_if1.add_nhs_route(ipv4(onet2_ip(ctl, 0)), [ipv4(onet1_ip(ctl, 1, []))])
+    m1_if1.add_nhs_route(ipv6(onet2_ip(ctl, 0)), [ipv6(onet1_ip(ctl, 1, []))])
+    m2_if1.add_nhs_route("1.2.3.4/32", [ipv4(unet_ip(ctl, 1, []))])
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
@@ -58,17 +58,17 @@ def do_task(ctl, hosts, ifaces, aliases):
              encap_route(sw, vrf1, 4, g2, ip=ipv6):
 
             sleep(30)
-            ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
+            ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                       ipv6=True, require_fastpath=False)
-            ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g,
+            ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,
                       require_fastpath=False)
 
         # After the conflicting tunnel is gone, the traffic should again go
         # through fast path.
         sleep(30)
-        ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
+        ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                   ipv6=True)
-        ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
+        ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),
