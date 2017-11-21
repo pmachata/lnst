@@ -46,7 +46,8 @@ def do_task(ctl, hosts, ifaces, aliases):
                  encap_route(sw, vrf_o, 2, g):
 
                 sleep(30)
-                ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)
+                ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,
+                          require_fastpath=False)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),
