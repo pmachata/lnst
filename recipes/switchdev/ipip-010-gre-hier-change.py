@@ -175,6 +175,7 @@ def do_task(ctl, hosts, ifaces, aliases):
         # misconfigured. Thus there's no conflict and both g4 and g6 are
         # offloaded. When the configuration of g4 is fixed, both tunnels are
         # forced to slow path, but now they both work.
+        # There's a similar test in ipip-007 for VRF migration.
         logging.info("--- local change conflict")
         with encap_route(m2, vrf_None, 1, "gre1", ip=ipv4), \
              dummy(sw, vrf_u, ip=["1.2.3.6/32"]) as d4, \
@@ -202,9 +203,9 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             sleep(5)
             ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
-                      ipv6=True, require_fastpath=False)
+                      ipv6=True, require_fastpath=False, require_slowpath=True)
             ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g4,
-                      require_fastpath=False)
+                      require_fastpath=False, require_slowpath=True)
 
         logging.info("--- ikey change")
         with encap_route(m2, vrf_None, 1, "gre2", ip=ipv4), \
