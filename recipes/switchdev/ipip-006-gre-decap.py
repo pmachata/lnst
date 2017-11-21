@@ -33,14 +33,44 @@ def do_task(ctl, hosts, ifaces, aliases):
     with encap_route(m2, vrf_None, 1, "gre1",
                      ip=ipv4, src=ipv4(onet2_ip(ctl, 33, []))), \
          encap_route(m2, vrf_None, 1, "gre1", ip=ipv6), \
-         dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d, \
          gre(sw, None, vrf_None,
              tos="inherit",
              local_ip="1.2.3.4",
              remote_ip="1.2.3.5") as g:
 
-        add_forward_route(sw, vrf_None, "1.2.3.5")
-        sleep(30)
+        with dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d:
+            add_forward_route(sw, vrf_None, "1.2.3.5")
+            sleep(30)
+
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                      ipv6=True)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
+
+            # Make sure that downing a tunnel makes the decap flow stop working.
+            logging.info("--- set a tunnel down")
+            g.set_link_down()
+            sleep(5)
+
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                      count=25, fail_expected=True, ipv6=True)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                      count=25, fail_expected=True)
+
+        # `g' is now down, and no local decap route exists, because `d' went
+        # away. Test adding an address directly to `g' and make sure that it
+        # isn't offloaded.
+        logging.info("--- add decap route to a down tunnel")
+        g.set_addresses(["1.2.3.4/32"])
+        sleep(5)
+
+        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                  count=25, fail_expected=True, ipv6=True)
+        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+                  count=25, fail_expected=True)
+
+        # Now set the tunnel back up and test that it again all works.
+        g.set_link_up()
+        sleep(5)
 
         ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
                   ipv6=True)
