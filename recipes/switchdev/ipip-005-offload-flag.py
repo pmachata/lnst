@@ -12,7 +12,7 @@ from lnst.Controller.Task import ctl
 from TestLib import TestLib, vrf, dummy, gre
 from ipip_common import ping_test, encap_route, \
                         add_forward_route, connect_host_ifaces, \
-                        test_ip, ipv4, ipv6
+                        onet2_ip, ipv4, ipv6
 from time import sleep
 import logging
 
@@ -33,7 +33,7 @@ def do_task(ctl, hosts, ifaces, aliases):
              encap_route(sw, vrf_None, 2, g, ip=ipv6):
             sleep(30)
 
-            ulip = test_ip(2, 0, [24, 64])
+            ulip = onet2_ip(ctl, 0, [24, 64])
             (r4,), _ = sw.get_routes("table 0 %s" % ipv4(ulip))
             if "offload" not in r4["flags"]:
                 tl.custom(sw, "ipip", "IPv4 encap route not offloaded")

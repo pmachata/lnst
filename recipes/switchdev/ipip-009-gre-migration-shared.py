@@ -12,7 +12,8 @@ from lnst.Controller.Task import ctl
 from TestLib import TestLib, vrf, dummy, gre
 from ipip_common import ping_test, encap_route, \
                         add_forward_route, connect_host_ifaces, \
-                        test_ip, ipv4, ipv6, refresh_addrs
+                        onet1_ip, onet2_ip, onet3_ip, onet4_ip, \
+                        unet1_ip, unet2_ip, ipv4, ipv6, refresh_addrs
 from time import sleep
 import logging
 
@@ -23,10 +24,10 @@ def do_task(ctl, hosts, ifaces, aliases):
      sw_if1_10, sw_if1_20,
      sw_if2_10, sw_if2_20) = ifaces
 
-    m1_if1_10.add_nhs_route(ipv4(test_ip(2, 0)), [ipv4(test_ip(1, 1, []))])
-    m1_if1_10.add_nhs_route(ipv6(test_ip(2, 0)), [ipv6(test_ip(1, 1, []))])
-    m1_if1_20.add_nhs_route(ipv4(test_ip(4, 0)), [ipv4(test_ip(3, 1, []))])
-    m1_if1_20.add_nhs_route(ipv6(test_ip(4, 0)), [ipv6(test_ip(3, 1, []))])
+    m1_if1_10.add_nhs_route(ipv4(onet2_ip(ctl, 0)), [ipv4(onet1_ip(ctl, 1, []))])
+    m1_if1_10.add_nhs_route(ipv6(onet2_ip(ctl, 0)), [ipv6(onet1_ip(ctl, 1, []))])
+    m1_if1_20.add_nhs_route(ipv4(onet4_ip(ctl, 0)), [ipv4(onet3_ip(ctl, 1, []))])
+    m1_if1_20.add_nhs_route(ipv6(onet4_ip(ctl, 0)), [ipv6(onet3_ip(ctl, 1, []))])
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
@@ -91,22 +92,22 @@ def do_task(ctl, hosts, ifaces, aliases):
         refresh_addrs(sw, sw_if1_20)
         refresh_addrs(sw, sw_if2_20)
 
-        add_forward_route(sw, svu1, "1.2.3.5", ipv4(test_ip(99, 2, [])))
-        add_forward_route(sw, svu2, "1.2.3.7", ipv4(test_ip(88, 2, [])))
-        add_forward_route(m2, vrf_None, "1.2.3.4", ipv4(test_ip(99, 1, [])))
-        add_forward_route(m2, vrf_None, "1.2.3.6", ipv4(test_ip(88, 1, [])))
+        add_forward_route(sw, svu1, "1.2.3.5", ipv4(unet1_ip(ctl, 2, [])))
+        add_forward_route(sw, svu2, "1.2.3.7", ipv4(unet2_ip(ctl, 2, [])))
+        add_forward_route(m2, vrf_None, "1.2.3.4", ipv4(unet1_ip(ctl, 1, [])))
+        add_forward_route(m2, vrf_None, "1.2.3.6", ipv4(unet2_ip(ctl, 1, [])))
 
         def quick_test(tun1_ipv4_fail, tun1_ipv6_fail,
                        tun2_ipv4_fail, tun2_ipv6_fail):
             sleep(5)
-            ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1_10, sg1,
+            ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1_10, sg1,
                       count=25, fail_expected=tun1_ipv6_fail, ipv6=True)
-            ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1_10, sg1,
+            ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1_10, sg1,
                       count=25, fail_expected=tun1_ipv4_fail)
 
-            ping_test(tl, m1, sw, ipv6(test_ip(4, 33, [])), m1_if1_20, None,
+            ping_test(tl, m1, sw, ipv6(onet4_ip(ctl, 33, [])), m1_if1_20, None,
                       count=25, fail_expected=tun2_ipv6_fail, ipv6=True)
-            ping_test(tl, m1, sw, ipv4(test_ip(4, 33, [])), m1_if1_20, None,
+            ping_test(tl, m1, sw, ipv4(onet4_ip(ctl, 33, [])), m1_if1_20, None,
                       count=25, fail_expected=tun2_ipv4_fail)
 
         sleep(30)

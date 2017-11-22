@@ -77,6 +77,43 @@ def test_ip(major, minor, prefix=[24,64]):
             "2002:%d::%d%s" % (major, minor,
             "/" + str(prefix[1]) if len(prefix) > 1 else "")]
 
+def net_ip(ctl, keys, minor, prefix):
+    base4 = ctl.get_alias(keys[0])
+    base6 = ctl.get_alias(keys[1]) if len(keys) > 1 else None
+
+    assert base4 is not None
+    ip4 = ["%s.%d%s" % (base4, minor,
+                        "/" + str(prefix[0]) if len(prefix) > 0 else "")]
+    ip6 = ["%s::%d%s" % (base6, minor,
+                         "/" + str(prefix[1]) if len(prefix) > 1 else "")] \
+          if base6 is not None else []
+
+    return ip4 + ip6
+
+def onet1_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["onet1", "o6net1"], minor, prefix)
+
+def onet2_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["onet2", "o6net2"], minor, prefix)
+
+def onet3_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["onet3", "o6net3"], minor, prefix)
+
+def onet4_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["onet4", "o6net4"], minor, prefix)
+
+def unet_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["unet"], minor, prefix)
+
+def unet1_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["unet1"], minor, prefix)
+
+def unet2_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["unet2"], minor, prefix)
+
+def unet3_ip(ctl, minor, prefix=[24,64]):
+    return net_ip(ctl, ["unet3"], minor, prefix)
+
 def add_forward_route(m, vrf, remote_ip, via=ipv4(test_ip(99, 2, []))):
     route(m, vrf, "%s/32 via %s"
           % (remote_ip, via)).__enter__()
