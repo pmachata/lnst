@@ -23,7 +23,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     # We can't set STP state if kernel's STP is running.
     br_options = {"stp_state": 0, "vlan_filtering": 1, "ageing_time": 1000,
-                  "multicast_querier": 1}
+                  "multicast_snooping": 0}
     sw.create_bridge(slaves=[sw_if1, sw_if2], options=br_options)
 
     m1_if1.reset(ip=test_ip(1, 1))

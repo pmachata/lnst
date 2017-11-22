@@ -26,8 +26,6 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
-    sw_if1.reset(ip=test_ip(1, 1))
-    sw_if2.reset(ip=test_ip(99,1))
 
     logging.info("=== UL migration")
     # - Test underlay migration: create a dummy in one VRF, then offload a
@@ -52,7 +50,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             sw.run("ip l set dev %s master %s" % (d.get_devname(), vrf_u))
 
-            sleep(15)
+            sleep(30)
             ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
                     ipv6=True)
             ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
@@ -81,7 +79,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             with encap_route(sw, vrf_None, 2, g, ip=ipv4), \
                  encap_route(sw, vrf_None, 2, g, ip=ipv6):
-                sleep(15)
+                sleep(30)
                 ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
                           ipv6=True)
                 ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)

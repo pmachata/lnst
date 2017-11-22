@@ -344,6 +344,12 @@ class InterfaceManager(object):
             return self.assign_name_generic("t_ip6vti")
         elif dev_type == "vxlan":
             return self.assign_name_generic("vxlan")
+        elif dev_type == "gre":
+            return self.assign_name_generic("gre_")
+        elif dev_type == "ipip":
+            return self.assign_name_generic("ipip_")
+        elif dev_type == "dummy":
+            return self.assign_name_generic("dummy_")
         else:
             return self.assign_name_generic("dev")
 
@@ -708,6 +714,9 @@ class Device(object):
     def link_cpu_ifstat(self):
         stats = {"devname": self._name,
                  "hwaddr": self._hwaddr}
+        if len(self._slaves) != 0:
+            return self.link_cpu_ifstat_from_slaves()
+
         try:
             out, _ = exec_cmd("ifstat -x c %s" % self._name)
         except:
@@ -732,6 +741,22 @@ class Device(object):
         stats["tx_packets"] = stats_data[2]
         stats["rx_bytes"] = stats_data[4]
         stats["tx_bytes"] = stats_data[6]
+        return stats
+
+    def link_cpu_ifstat_from_slaves(self):
+        stats = {"devname": self._name,
+                 "hwaddr": self._hwaddr}
+        fields_names = ["rx_packets", "tx_packets", "rx_bytes", "tx_bytes"]
+        for field in fields_names:
+            stats[field] = 0
+        for slave_index in self._slaves:
+            slave = self._if_manager.get_device(slave_index)
+            if slave is None:
+                pass
+            slave_stats = slave.link_cpu_ifstat()
+            for field in fields_names:
+                if field in slave_stats:
+                    stats[field] += slave_stats[field]
         return stats
 
     def set_addresses(self, ips):

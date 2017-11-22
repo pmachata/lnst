@@ -22,8 +22,6 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
-    sw_if1.reset(ip=test_ip(1, 2))
-    sw_if2.reset(ip=test_ip(99,1))
 
     # Test that offloaded routes do have "offload" flag.
     with dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d:
@@ -33,7 +31,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                  remote_ip="1.2.3.5") as g, \
              encap_route(sw, vrf_None, 2, g, ip=ipv4), \
              encap_route(sw, vrf_None, 2, g, ip=ipv6):
-            sleep(15)
+            sleep(30)
 
             ulip = test_ip(2, 0, [24, 64])
             (r4,), _ = sw.get_routes("table 0 %s" % ipv4(ulip))

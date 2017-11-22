@@ -25,8 +25,6 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
-    sw_if1.reset(ip=test_ip(1, 2))
-    sw_if2.reset(ip=test_ip(99,1))
 
     # Test that non-IPIP traffic gets to slow path.
     with dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d, \
@@ -35,7 +33,7 @@ def do_task(ctl, hosts, ifaces, aliases):
              local_ip="1.2.3.4",
              remote_ip="1.2.3.5") as g, \
          encap_route(sw, vrf_None, 2, g, ip=ipv4):
-        sleep(15)
+        sleep(30)
         ping_test(tl, m2, sw, "1.2.3.4", m2_if1, g, count=20)
 
     # Configure the wrong interface on M2 to test that the traffic gets trapped
@@ -48,7 +46,7 @@ def do_task(ctl, hosts, ifaces, aliases):
              gre(sw, None, vrf_None,
                  local_ip="1.2.3.4",
                  remote_ip="1.2.3.5") as g:
-            sleep(15)
+            sleep(30)
 
             before_stats = sw_if2.link_stats()["rx_packets"]
             ping_test(tl, m2, sw, ipv4(test_ip(1, 33, [])), m2_if1, g,

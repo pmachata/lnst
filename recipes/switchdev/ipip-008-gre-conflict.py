@@ -26,8 +26,6 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
-    sw_if1.reset(ip=test_ip(1, 1))
-    sw_if2.reset(ip=test_ip(99,1))
 
     # Check the behavior when two tunnels with conflicting local addresses are
     # used.
@@ -59,7 +57,7 @@ def do_task(ctl, hosts, ifaces, aliases):
              encap_route(sw, vrf1, 4, g2, ip=ipv4), \
              encap_route(sw, vrf1, 4, g2, ip=ipv6):
 
-            sleep(15)
+            sleep(30)
             ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
                       ipv6=True, require_fastpath=False)
             ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g,
@@ -67,7 +65,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
         # After the conflicting tunnel is gone, the traffic should again go
         # through fast path.
-        sleep(15)
+        sleep(30)
         ping_test(tl, m1, sw, ipv6(test_ip(2, 33, [])), m1_if1, g,
                   ipv6=True)
         ping_test(tl, m1, sw, ipv4(test_ip(2, 33, [])), m1_if1, g)
