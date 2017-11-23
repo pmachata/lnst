@@ -41,7 +41,6 @@ def do_task(ctl, hosts, ifaces, aliases):
     tl = TestLib(ctl, aliases)
 
     linkneg(tl, sw_if1, m1_if1)
-    linkneg(tl, m1_if1, sw_if1)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("switch")],
