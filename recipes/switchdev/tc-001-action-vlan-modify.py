@@ -24,6 +24,11 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.add_br_vlan(85)
     sw_if2.add_br_vlan(65)
 
+    # These 2 aren't needed functionally, but used to prevent logged errors -
+    # Learning fails upon receiving packets on a non-configured {port, vlan}
+    sw_if1.add_br_vlan(65)
+    sw_if2.add_br_vlan(85)
+
     q1 = Qdisc(sw_if1, 0xffff, "ingress")
     q1.filter_add("protocol all flower skip_sw action vlan modify id 65")
 
