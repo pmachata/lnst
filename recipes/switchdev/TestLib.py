@@ -84,7 +84,7 @@ class TestLib:
         m2.run(linkneg_mod, desc=desc, netns=if2.get_netns())
 
     def ping_simple(self, if1, if2, fail_expected=False, desc=None,
-                    limit_rate=90, count=100, interval=0.2):
+                    limit_rate=90, count=20, interval=0.1):
         if not desc:
             desc = self._generate_default_desc(if1, [if2])
 
