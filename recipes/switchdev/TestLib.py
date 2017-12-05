@@ -351,7 +351,7 @@ class TestLib:
 
         if found and not find:
             if err_arg is None:
-                err_msg = "didn't find record when should've"
+                err_msg = "found record when shouldn't"
             else:
                 err_msg = "found %s record when shouldn't" % err_arg
         elif find and not found:
