@@ -29,6 +29,9 @@ def do_task(ctl, hosts, ifaces, aliases):
     m1_if1.reset(ip=test_ip(1, 1))
     m2_if1.reset(ip=test_ip(1, 2))
 
+    # Make sure FDB is not populated by control packets.
+    sw_if1.set_br_learning(on=False, master=True)
+
     sleep(40)
 
     tl = TestLib(ctl, aliases)
@@ -36,6 +39,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     # Set STP state to DISABLED and make sure ping fails and FDB is not
     # populated.
     sw_if1.set_br_state(0)
+    sw_if1.set_br_learning(on=True, master=True)
     tl.ping_simple(m1_if1, m2_if1, fail_expected=True)
     tl.check_fdb(sw_if1, m1_if1.get_hwaddr(), 1, True, True, False)
 
@@ -50,6 +54,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.set_br_state(2)
     tl.ping_simple(m1_if1, m2_if1, fail_expected=True)
     tl.check_fdb(sw_if1, m1_if1.get_hwaddr(), 1, True, True)
+    sw_if1.set_br_learning(on=False, master=True)
 
     sleep(30)
 
@@ -58,8 +63,11 @@ def do_task(ctl, hosts, ifaces, aliases):
     # Set STP state to FORWARDING and make sure ping works and FDB is
     # populated.
     sw_if1.set_br_state(3)
+    sw_if1.set_br_learning(on=True, master=True)
     tl.ping_simple(m1_if1, m2_if1)
     tl.check_fdb(sw_if1, m1_if1.get_hwaddr(), 1, True, True)
+    sw_if1.set_br_learning(on=False, master=True)
+    sw_if2.set_br_learning(on=False, master=True)
 
     sleep(30)
 
@@ -68,6 +76,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     # Make sure that even with a static FDB record we don't get traffic
     # when state is DISABLED, LEARNING or LISTENING.
     sw_if2.add_br_fdb(str(m2_if1.get_hwaddr()), master=True, vlan_tci=1)
+    sw_if1.set_br_learning(on=True, master=True)
+    sw_if2.set_br_learning(on=True, master=True)
     sw_if1.set_br_state(0)
     tl.ping_simple(m1_if1, m2_if1, fail_expected=True)
     sw_if1.set_br_state(1)
