@@ -40,22 +40,27 @@ def do_task(ctl, hosts, ifaces, aliases):
     tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if1.set_link_down()
-    tl.ping_simple(m1_lag1, m2_lag1, limit_rate=50)
+    tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if1.set_link_up()
+    # Wait for link to come up. Otherwise we start the ping when both
+    # links are down.
+    sleep(30)
     sw_if2.set_link_down()
-    tl.ping_simple(m1_lag1, m2_lag1, limit_rate=50)
+    tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if2.set_link_up()
+    sleep(30)
     sw_if1.set_link_down()
     sw_if3.set_link_down()
-    tl.ping_simple(m1_lag1, m2_lag1, limit_rate=50)
+    tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if1.set_link_up()
     sw_if3.set_link_up()
+    sleep(30)
     sw_if2.set_link_down()
     sw_if4.set_link_down()
-    tl.ping_simple(m1_lag1, m2_lag1, limit_rate=50)
+    tl.ping_simple(m1_lag1, m2_lag1)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),
