@@ -22,6 +22,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     m1_if1.add_nhs_route(ipv4(onet2_ip(ctl, 0)), [ipv4(onet1_ip(ctl, 1, []))])
     m2_if1.add_nhs_route("1.2.3.4/32", [ipv4(unet_ip(ctl, 1, []))])
+    m2_gre3 = m2.get_interface("gre3")
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
@@ -49,7 +50,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             sleep(30)
 
             before_stats = sw_if2.link_stats()["rx_packets"]
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1, g,
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre3, g,
                       count=20, fail_expected=True)
             after_stats = sw_if2.link_stats()["rx_packets"]
             delta = after_stats - before_stats

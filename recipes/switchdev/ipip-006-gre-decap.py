@@ -24,6 +24,7 @@ def do_task(ctl, hosts, ifaces, aliases):
      sw_if2_10, sw_if2_20) = ifaces
 
     m2_if1_10.add_nhs_route("1.2.3.4/32", [ipv4(unet_ip(ctl, 1, []))])
+    m2_gre1 = m2.get_interface("gre1")
 
     vrf_None = None
     tl = TestLib(ctl, aliases)
@@ -42,18 +43,18 @@ def do_task(ctl, hosts, ifaces, aliases):
             add_forward_route(sw, vrf_None, "1.2.3.5")
             sleep(30)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
 
             # Make sure that downing a tunnel makes the decap flow stop working.
             logging.info("--- set a tunnel down")
             g.set_link_down()
             sleep(5)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       count=25, fail_expected=True, ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       count=25, fail_expected=True)
 
         # `g' is now down, and no local decap route exists, because `d' went
@@ -63,18 +64,18 @@ def do_task(ctl, hosts, ifaces, aliases):
         g.set_addresses(["1.2.3.4/32"])
         sleep(5)
 
-        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                   count=25, fail_expected=True, ipv6=True)
-        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g,
                   count=25, fail_expected=True)
 
         # Now set the tunnel back up and test that it again all works.
         g.set_link_up()
         sleep(5)
 
-        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                   ipv6=True)
-        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
+        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
 
     with vrf(sw) as vrf_u, \
          vrf(sw) as vrf_o, \
@@ -95,9 +96,9 @@ def do_task(ctl, hosts, ifaces, aliases):
             logging.info("--- hierarchical configuration")
             sleep(30)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
 
             # Make sure that downing an underlay device doesn't make the decap
             # flow stop working. There is a complementary test in ipip-010 to
@@ -106,9 +107,9 @@ def do_task(ctl, hosts, ifaces, aliases):
             d.set_link_down()
             sleep(5)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
 
         # Make sure that when a newly-created tunnel has a down underlay, decap
         # still works. There's a complementary test in ipip-010 to test that
@@ -121,9 +122,9 @@ def do_task(ctl, hosts, ifaces, aliases):
                  local_ip="1.2.3.4",
                  remote_ip="1.2.3.5") as g:
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_if1_10, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_if1_10, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),
