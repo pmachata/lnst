@@ -10,6 +10,7 @@ nogahf@mellanox.com (Nogah Frankel)
 
 from time import sleep
 import logging
+from lnst.Controller.Task import ctl
 
 # Merely a container for a run results
 # Holds:
@@ -22,6 +23,26 @@ class RedTestResults:
         self.stats = red_stats
         self.backlogs = backlogs
 
+    def check_stats_minimal(self, log_function):
+        if self.stats == {}:
+            log_function("Stats collection failed")
+            raise Exception("No stats")
+
+    def compare_stats(self, drops, tx_packets, threshold):
+        err = []
+        if abs(drops - self.stats["drops"]) > threshold:
+            err.append("RED stats's drops %d != actual drops %d" %
+                       (self.stats["drops"], drops))
+        if abs(tx_packets - self.stats["tx_packets"]) > threshold:
+            err.append("RED stats's tx packets %d != actual number %d" %
+                       (self.stats["tx_packets"], tx_packets))
+        if abs(self.stats["early"] + self.stats["pdrop"]-
+               self.stats["drops"]) > threshold:
+            err.append("%d early drops + %d pdrops != total drops %d" %
+                       (self.stats["early"], self.stats["pdrop"],
+                        self.stats["drops"]))
+        return err
+
 class RedTestLib:
     def __init__(self, tl, switch, links):
         self.tl = tl
@@ -31,13 +52,16 @@ class RedTestLib:
         self.switch.create_bridge(slaves=self.ports,
                                   options={"vlan_filtering": 1})
         self.rate = 0
-        self.desc = "TC qdisc RED"
         self.threshold = 100
         self.speed_base = 1000
         self.min = 0
         self.max = 0
         self.rate = self.speed_base
         self.set_traffic_ecn_enable()
+
+    # To be used to report about problem that shouldn't occur.
+    def generic_error_function(self, msg):
+        self.tl.custom(self.switch, "TC qdisc RED", msg)
 
     # choose egress & ingress ports and set their speed to create bottleneck
     def create_bottleneck(self, aliases):
@@ -58,6 +82,8 @@ class RedTestLib:
         limit = max * 4
         avpkt = 1000
         self.egress_port.set_qdisc_red(limit, avpkt, min, max, ecn=ecn)
+        stats = self.egress_port.qdisc_red_stats()
+        self.check_stats_were_offloaded(stats)
         self.min = min
         self.max = max
 
@@ -65,6 +91,14 @@ class RedTestLib:
         self.min = 0
         self.max = 0
         self.egress_port.unset_qdisc_red()
+
+    def check_stats_were_offloaded(self, stats):
+        if stats == {}:
+            self.generic_error_function("Config failed")
+            raise Exception("test failed")
+        if not stats["offload"]:
+            self.generic_error_function("Offloading failed")
+            raise Exception("test failed")
 
     # Send traffic in the set rate.
     # If RED is set, collect res stats while the traffic is being sent.
@@ -91,7 +125,12 @@ class RedTestLib:
 
         if is_red:
             backlog, stats = self.egress_port.stop_collecting_qdisc_red_stats()
+            self.check_stats_were_offloaded(stats)
             results = RedTestResults(stats, backlog)
+            results.check_stats_minimal(self.generic_error_function)
+            errors = results.compare_stats(drops, tx_packets, self.threshold)
+            for err_msg in errors:
+                generic_error_function(err_msg)
         else:
             stats = {"drops": drops, "tx_packets": tx_packets}
             results = RedTestResults(stats, [])
