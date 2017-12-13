@@ -1,0 +1,69 @@
+
+<lnstrecipe xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="default_aliases.xml" />
+    <network>
+        <host id="machine1">
+            <interfaces>
+                <eth id="if1" label="A" />
+                <eth id="if2" label="B" />
+                <bond id="bond1">
+                    <options>
+                        <option name="mode" value="802.3ad"/>
+                    </options>
+                    <slaves>
+                        <slave id="if2"/>
+                        <slave id="if1"/>
+                    </slaves>
+                </bond>
+            </interfaces>
+        </host>
+        <host id="machine2">
+            <interfaces>
+                <eth id="if1" label="C" />
+                <eth id="if2" label="D" />
+                <vlan id="if2.10">
+                    <options>
+                        <option name="vlan_tci" value="10" />
+                    </options>
+                    <slaves>
+                        <slave id="if2"/>
+                    </slaves>
+                </vlan>
+            </interfaces>
+        </host>
+        <host id="switch">
+            <interfaces>
+                <eth id="if1" label="A" />
+                <eth id="if2" label="B" />
+                <eth id="if3" label="C" />
+                <eth id="if4" label="D" />
+                <vlan id="if4.10">
+                    <options>
+                        <option name="vlan_tci" value="10" />
+                    </options>
+                    <slaves>
+                        <slave id="if4"/>
+                    </slaves>
+                </vlan>
+                <bridge id="br1">
+                    <options>
+			<option name="vlan_filtering" value="1"/>
+                    </options>
+                    <slaves>
+                        <slave id="if3"/>
+                    </slaves>
+                </bridge>
+                <bond id="bond1">
+                    <options>
+                        <option name="mode" value="802.3ad"/>
+                    </options>
+                    <slaves>
+                        <slave id="if1"/>
+                        <slave id="if2"/>
+                    </slaves>
+                </bond>
+            </interfaces>
+        </host>
+    </network>
+    <task python="qos-009-red_not_offloaded.py" />
+</lnstrecipe>
