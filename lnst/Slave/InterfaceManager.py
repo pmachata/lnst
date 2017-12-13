@@ -775,6 +775,30 @@ class Device(object):
     def unset_qdisc_red(self):
         exec_cmd("tc qdisc del dev %s root" % self._name)
 
+    def qdisc_red_stats(self):
+        try:
+            out, _ = exec_cmd("tc -s qdisc show dev %s" % self._name)
+        except ExecCmdFail:
+            return {}
+
+        p = r"[.\n]*?qdisc red .+?(offload)?\s*\n\s*Sent " \
+            r"(?P<tx_bytes>\d+) bytes (?P<tx_packets>\d+) pkt \(dropped " \
+            r"(?P<drops>\d+), overlimits (?P<overlimits>\d+).*\n\s*backlog " \
+            r"(?P<backlog>\d+\w?)b.*\n.*?marked (?P<marked>\d+) early " \
+            r"(?P<early>\d+) pdrop (?P<pdrop>\d+)"
+        red_pattern = re.compile(p, re.MULTILINE)
+        stats_raw = red_pattern.match(out)
+        if not stats_raw:
+            return {}
+
+        stats = {key: int(val.replace("K", "000").replace("M", "000000"))
+                for key, val in stats_raw.groupdict().iteritems()}
+
+        stats["offload"] = "offload" in stats_raw.groups()
+        stats["devname"] = self._name
+        stats["hwaddr"] = self._hwaddr
+        return stats
+
     def set_addresses(self, ips):
         self._conf.set_addresses(ips)
         exec_cmd("ip addr flush %s scope global" % self._name)

@@ -836,6 +836,10 @@ class Interface(object):
     def unset_qdisc_red(self):
         self._machine._rpc_call_x(self._netns, "unset_qdisc_red", self._id)
 
+    def qdisc_red_stats(self):
+        return self._machine._rpc_call_x(self._netns, "qdisc_red_stats",
+                                         self._id)
+
     def set_addresses(self, ips):
         self._addresses = ips
         self._machine._rpc_call_x(self._netns, "set_addresses",
