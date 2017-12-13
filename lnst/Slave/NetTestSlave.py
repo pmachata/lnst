@@ -227,6 +227,21 @@ class SlaveMethods:
             return {}
         return dev.qdisc_red_stats()
 
+    def collect_qdisc_red_stats(self, if_id):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        dev.collect_qdisc_red_stats()
+        return True
+
+    def stop_collecting_qdisc_red_stats(self, if_id):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return {}
+        return dev.stop_collecting_qdisc_red_stats()
+
     def link_stats(self, if_id):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:

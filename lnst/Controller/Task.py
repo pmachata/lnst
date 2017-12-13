@@ -716,6 +716,12 @@ class InterfaceAPI(object):
     def qdisc_red_stats(self):
         return self._if.qdisc_red_stats()
 
+    def collect_qdisc_red_stats(self):
+        return self._if.collect_qdisc_red_stats()
+
+    def stop_collecting_qdisc_red_stats(self):
+        return self._if.stop_collecting_qdisc_red_stats()
+
     def set_link_up(self):
         return self._if.set_link_up()
 

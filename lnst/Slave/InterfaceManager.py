@@ -15,14 +15,16 @@ olichtne@redhat.com (Ondrej Lichtner)
 import re
 import select
 import logging
+from time import sleep
 from lnst.Slave.NetConfigDevice import NetConfigDevice
 from lnst.Slave.NetConfigCommon import get_option
 from lnst.Common.NetUtils import normalize_hwaddr
 from lnst.Common.NetUtils import scan_netdevs
-from lnst.Common.ExecCmd import exec_cmd
+from lnst.Common.ExecCmd import exec_cmd, ExecCmdFail
 from lnst.Common.ConnectionHandler import recv_data
 from lnst.Slave.DevlinkManager import DevlinkManager
 from pyroute2 import IPRSocket
+from multiprocessing import Process, Manager, Value
 from pyroute2.netlink.rtnl import RTNLGRP_IPV4_IFADDR
 from pyroute2.netlink.rtnl import RTNLGRP_IPV6_IFADDR
 from pyroute2.netlink.rtnl import RTNLGRP_LINK
@@ -377,6 +379,7 @@ class Device(object):
         self._devlink = None
 
         self._if_manager = if_manager
+        self._red_stats_collector = None
 
     def set_devlink(self, devlink_port_data):
         self._devlink = devlink_port_data
@@ -561,6 +564,8 @@ class Device(object):
                      egress_pref))
 
     def clear_configuration(self):
+        if self._red_stats_collector != None:
+            self._red_stats_collector.stop()
         if self._master["primary"]:
             primary_id = self._master["primary"]
             primary_dev = self._if_manager.get_device(primary_id)
@@ -798,6 +803,65 @@ class Device(object):
         stats["devname"] = self._name
         stats["hwaddr"] = self._hwaddr
         return stats
+
+    class QdiscRedStatCollector:
+        def __init__(self, get_stats_func):
+            self._get_stats_func = get_stats_func
+            self._stop_flag = Value("b", True)
+            self._stats = Manager().dict()
+            self._p = None
+            self._old_stats = {}
+            self._backlogs = None
+
+        def _collect_qdisc_red_stats(self, stop_flag, stats, backlogs):
+            while not stop_flag.value:
+                new_stats = self._get_stats_func()
+                if new_stats == {}:
+                    continue
+                if new_stats["tx_packets"] > stats["tx_packets"]:
+                    stats.update(new_stats)
+                    backlogs.append(stats["backlog"])
+                sleep(0.25)
+
+        def start(self):
+            if not self._stop_flag.value:
+                return
+
+            self._stats.clear()
+            self._backlogs = Manager().list()
+            self._old_stats = self._get_stats_func()
+            self._stats.update(self._old_stats)
+            self._stop_flag.value = False
+            self._p = Process(target=self._collect_qdisc_red_stats,
+                             args=(self._stop_flag, self._stats, self._backlogs))
+            self._p.start()
+
+        def stop(self):
+            if self._stop_flag.value:
+                return
+
+            self._stop_flag.value = True
+            self._p.join(0)
+            backlogs = list(self._backlogs)
+            stats = self._stats.copy()
+            for key in self._old_stats.keys():
+                if key not in stats:
+                    continue
+                if type(stats[key]) in (int, long):
+                    stats[key] -= self._old_stats[key]
+            return (backlogs, stats)
+
+    def collect_qdisc_red_stats(self):
+        assert self._red_stats_collector is None
+        self._red_stats_collector = self.QdiscRedStatCollector(self.qdisc_red_stats)
+        self._red_stats_collector.start()
+
+    def stop_collecting_qdisc_red_stats(self):
+        ret = {}
+        if self._red_stats_collector is not None:
+            ret = self._red_stats_collector.stop()
+            self._red_stats_collector = None
+        return ret
 
     def set_addresses(self, ips):
         self._conf.set_addresses(ips)
