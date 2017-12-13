@@ -1,0 +1,30 @@
+<lnstrecipe xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="default_aliases.xml" />
+    <network>
+        <host id="machine1">
+            <interfaces>
+                <eth id="if1" label="A">
+                    <addresses>
+                        <address value="192.168.101.10/24"/>
+                    </addresses>
+                </eth>
+            </interfaces>
+        </host>
+        <host id="machine2">
+            <interfaces>
+                <eth id="if1" label="B">
+                    <addresses>
+                        <address value="192.168.101.11/24"/>
+                    </addresses>
+                </eth>
+            </interfaces>
+        </host>
+        <host id="switch">
+            <interfaces>
+                <eth id="if1" label="A" />
+                <eth id="if2" label="B" />
+            </interfaces>
+        </host>
+    </network>
+    <task python="qos-006-red_basic.py" />
+</lnstrecipe>
