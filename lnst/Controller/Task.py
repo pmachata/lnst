@@ -707,6 +707,12 @@ class InterfaceAPI(object):
     def link_cpu_ifstat(self):
         return self._if.link_cpu_ifstat()
 
+    def set_qdisc_red(self, limit, avpkt, _min, _max, **args):
+        self._if.set_qdisc_red(limit, avpkt, _min, _max, **args)
+
+    def unset_qdisc_red(self):
+        self._if.unset_qdisc_red()
+
     def set_link_up(self):
         return self._if.set_link_up()
 

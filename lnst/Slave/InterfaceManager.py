@@ -759,6 +759,22 @@ class Device(object):
                     stats[field] += slave_stats[field]
         return stats
 
+    def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
+                      change = False, burst = None):
+        cmd = "change" if change else "add"
+        cmd = "tc qdisc %s dev %s root red limit %d avpkt %d min %d max %d" % \
+              (cmd, self._name, limit, avpkt, _min, _max)
+        if prob:
+            cmd += " prob %d" % prob
+        if ecn:
+            cmd += " ecn"
+        if burst:
+            cmd += " burst %d" % burst
+        exec_cmd(cmd)
+
+    def unset_qdisc_red(self):
+        exec_cmd("tc qdisc del dev %s root" % self._name)
+
     def set_addresses(self, ips):
         self._conf.set_addresses(ips)
         exec_cmd("ip addr flush %s scope global" % self._name)
