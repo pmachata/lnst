@@ -92,6 +92,22 @@ class RedTestLib:
         self.max = 0
         self.egress_port.unset_qdisc_red()
 
+    def set_low_rate(self):
+        self.rate = self.speed_base * 0.99
+        logging.info("Set slow rate %d M" % self.rate)
+
+    def set_lower_rate(self):
+        self.rate *= 0.9
+        logging.info("New rate is %d M" % self.rate)
+
+    def set_high_rate(self):
+        self.rate = max(self.speed_base * 1.01, self.rate * 1.25)
+        logging.info("Set high rate %d M" % self.rate)
+
+    def set_higher_rate(self):
+        self.rate *= 1.1
+        logging.info("New rate is %d M" % self.rate)
+
     def check_stats_were_offloaded(self, stats):
         if stats == {}:
             self.generic_error_function("Config failed")
@@ -137,4 +153,41 @@ class RedTestLib:
 
         logging.info("Sent %d packets, dropped %d packets" % (tx_after, drops))
         return results
+
+    # Send traffic and check the backlogs stats later. If the max backlog is
+    # over some threshold (given as a ratio to the min red limit), lower the
+    # rate and re-run.
+    def tune_low_rate(self, backlog_threshold):
+        full_backlog_size = self.min * backlog_threshold
+        logging.info("Tune low rate till max backlog is below %s of the "
+                     "backlog (%d bytes)" % (backlog_threshold,
+                                             full_backlog_size))
+        self.set_low_rate()
+        while True:
+            res = self.send_traffic()
+            if max(res.backlogs) <= full_backlog_size:
+                return res
+            logging.info("The max backlog was %d bytes. Decrease rate" %
+                          max(res.backlogs))
+            self.set_lower_rate()
+
+    # Send traffic and check the backlogs stats later. If most of the backlogs
+    # were less than the given threshold (given as a ratio to the min red
+    # limit), set the rate to higher.
+    def tune_high_rate(self, backlog_threshold):
+        full_backlog_size = self.min * backlog_threshold
+        logging.info("Tune high rate till more than half of the backlogs are "
+                     "above below %s of the backlog (%d bytes)" %
+                     (backlog_threshold, full_backlog_size))
+        self.set_high_rate()
+        while True:
+            res = self.send_traffic()
+            backlogs_overlimit = len([b for b in res.backlogs
+                                      if b > full_backlog_size])
+            if backlogs_overlimit >= 0.5 * len(res.backlogs):
+               return res
+            logging.info("Only %d backlogs (from %f total) were over the "
+                         "limit. Increase rate" %
+                         (backlogs_overlimit, len(res.backlogs)))
+            self.set_higher_rate()
 
