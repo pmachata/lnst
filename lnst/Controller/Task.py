@@ -974,6 +974,9 @@ class VolatileValue(object):
     def __str__(self):
         return str(self.get_val())
 
+    def __int__(self):
+        return int(self.get_val())
+
 class PerfRepoAPI(object):
     def __init__(self):
         self._rest_api = None
