@@ -63,6 +63,10 @@ class RedTestLib:
     def generic_error_function(self, msg):
         self.tl.custom(self.switch, "TC qdisc RED", msg)
 
+    # To be used for checks that always needs to report passing or failing
+    def test_result(self, desc, msg):
+        self.tl.custom(self.switch, desc, msg)
+
     # choose egress & ingress ports and set their speed to create bottleneck
     def create_bottleneck(self, aliases):
         self.egress_port = self.ports[0]
@@ -190,4 +194,138 @@ class RedTestLib:
                          "limit. Increase rate" %
                          (backlogs_overlimit, len(res.backlogs)))
             self.set_higher_rate()
+
+    # Check that there were no pdrops (with some error margins of the internal
+    # threshold)
+    def check_no_pdrops(self, desc, res):
+        msg = ""
+        if res.stats["pdrop"] > self.threshold:
+            msg = "Too many pdrops (%d)" % res.stats["pdrop"]
+        self.test_result(desc, msg)
+
+    # Check the run res for red with or without ecn for low rate traffic.
+    def check_red_ecn_low(self, name, res):
+        logging.info("Low rate %s, expect no drops nor marks" % name)
+
+        desc = "%s marking low rate" % name
+        msg = ""
+        if res.stats["marked"] > self.threshold:
+            msg = "marked %d packets when expected 0" % res.stats["marked"]
+        self.test_result(desc, msg)
+
+        desc = "%s low rate" % name
+        msg = ""
+        if res.stats["early"] > self.threshold:
+            msg = "Too many packets were dropped (%d)" % res.stats["early"]
+        self.test_result(desc, msg)
+
+        self.check_no_pdrops("%s low rate - pdrops" % name, res)
+
+    def check_red_low(self, res):
+        self.check_red_ecn_low("RED", res)
+
+    def check_ecn_low(self, res):
+        self.check_red_ecn_low("ECN", res)
+
+    # Check the run res for red for high rate traffic.
+    def check_red_high(self, res):
+        logging.info("High rate RED, expect early drops but no pdrops and "
+                     "worse throughput than in low rate")
+
+        full_backlog_size = self.min * 0.95
+        backlogs_overlimit = len([b for b in res.backlogs
+                                  if b > full_backlog_size])
+        desc = "RED high rate - early drops"
+        msg = ""
+        if res.stats["early"] < self.threshold * backlogs_overlimit:
+            msg = "Not enough early drops (%d)" % res.stats["early"]
+        self.test_result(desc, msg)
+
+        self.check_no_pdrops("RED high rate - pdrops", res)
+
+        desc = "RED high rate - throughput"
+        msg = ""
+        if self.min > res.stats["tx_bytes"]:
+            msg = "throughput %d is lower than the minimal limit %d" % \
+                   (res.stats["tx_packets"], self.min)
+        self.test_result(desc, msg)
+
+    # Check the run res for high rate traffic and no res. Compare them to the
+    # results in the same rate with red.
+    def check_no_red(self, res, high_red_res):
+        logging.info("No RED test, expect no worse drops and throughput than "
+                     "with RED")
+        desc = "no RED - drops"
+        msg = ""
+        if res.stats["drops"] > high_red_res.stats["drops"]:
+            msg = "more drops (%d) than with RED (%d)" % \
+                   (res.stats["drops"], high_red_res.stats["drops"])
+        self.test_result(desc, msg)
+
+        desc = "no RED - throughput"
+        msg = ""
+        if high_red_res.stats["tx_packets"] > res.stats["tx_packets"]:
+            msg = "throughput %d is lower than with RED %d" % \
+                  (res.stats["tx_packets"], high_red_res.stats["tx_packets"])
+        self.test_result(desc, msg)
+
+    # Check the run res for red-ecn for high rate traffic.
+    def check_ecn_high(self, res):
+        logging.info("High rate ECN, expect marks, allow pdrops but not "
+                     "early drops")
+
+        # we expect at least all the packets over the limit to be marked
+        should_mark = sum(max(0, x - self.max) for x in res.backlogs)
+        pkt_size = int(self.links[self.ingress_port].get_mtu())
+        should_mark /= pkt_size
+
+        should_not_mark = sum(x for x in res.backlogs if x < self.min)
+        should_not_mark /= pkt_size
+
+        desc = "ECN marking high rate"
+        msg = ""
+        if res.stats["marked"] < should_mark - self.threshold:
+            msg = "marked %d packets when expected at least %d" % \
+                (res.stats["marked"], should_mark)
+        elif res.stats["marked"] > res.stats["tx_packets"] - should_not_mark:
+            msg = "marked %d packets when expected no more than %d" % \
+                  (res.stats["marked"],
+                   res.stats["tx_packets"] - should_not_mark)
+        self.test_result(desc, msg)
+
+        desc = "ECN early drops - high rate"
+        msg = ""
+        if res.stats["early"] > self.threshold:
+            msg = "Too many packets were early dropped %d (expected none)" % \
+                  res.stats["early"]
+        self.test_result(desc, msg)
+
+    # Compare the run res of red-ecn with very high traffic rate to the ones
+    # with lower (but still high) rate.
+    def check_ecn_very_high(self, res, high_ecn_res):
+        logging.info("Very high rate ECN, expect lots of pdrops")
+        desc = "ECN marking - pdrops"
+        msg = ""
+        if res.stats["pdrop"] * 0.9 < high_ecn_res.stats["pdrop"]:
+            msg = "only %d packets got pdrops, expected >> %d" % \
+                  (res.stats["pdrop"], high_ecn_res.stats["pdrop"])
+        self.test_result(desc, msg)
+
+    # Run traffic and see that it doesn't get marked.
+    def check_no_ecn(self):
+        logging.info("No ECN check: run traffic and see check on the "
+                     "receiving host that it was not marked")
+        receiving_port = self.links[self.egress_port]
+        host = receiving_port.get_host()
+        host.sync_resources(modules=["PacketAssert"])
+        options = {"min":0, "max" :0, "promiscuous" :True,
+                   "filter" :'ip[1]&3=3',
+                   "interface": receiving_port.get_devname()}
+        packet_assert_mod = ctl.get_module("PacketAssert", options=options)
+        proc = host.run(packet_assert_mod, bg=True)
+        pkt_size = self.links[self.ingress_port].get_mtu()
+        self.tl.pktgen(self.links[self.ingress_port],
+                       self.links[self.egress_port], pkt_size, count=10**6,
+                       tos=self.tos, rate=str(self.rate)+"M")
+        proc.intr()
 
