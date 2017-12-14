@@ -204,6 +204,44 @@ class SlaveMethods:
             return {}
         return dev.link_cpu_ifstat()
 
+    def set_qdisc_red(self, if_id, limit, avpkt, _min, _max, args):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        dev.set_qdisc_red(limit, avpkt, _min, _max, **args)
+        return True
+
+    def unset_qdisc_red(self, if_id):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        dev.unset_qdisc_red()
+        return True
+
+    def qdisc_red_stats(self, if_id):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return {}
+        return dev.qdisc_red_stats()
+
+    def collect_qdisc_red_stats(self, if_id):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        dev.collect_qdisc_red_stats()
+        return True
+
+    def stop_collecting_qdisc_red_stats(self, if_id):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return {}
+        return dev.stop_collecting_qdisc_red_stats()
+
     def link_stats(self, if_id):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:

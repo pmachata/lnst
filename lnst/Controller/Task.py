@@ -707,6 +707,21 @@ class InterfaceAPI(object):
     def link_cpu_ifstat(self):
         return self._if.link_cpu_ifstat()
 
+    def set_qdisc_red(self, limit, avpkt, _min, _max, **args):
+        self._if.set_qdisc_red(limit, avpkt, _min, _max, **args)
+
+    def unset_qdisc_red(self):
+        self._if.unset_qdisc_red()
+
+    def qdisc_red_stats(self):
+        return self._if.qdisc_red_stats()
+
+    def collect_qdisc_red_stats(self):
+        return self._if.collect_qdisc_red_stats()
+
+    def stop_collecting_qdisc_red_stats(self):
+        return self._if.stop_collecting_qdisc_red_stats()
+
     def set_link_up(self):
         return self._if.set_link_up()
 
@@ -973,6 +988,9 @@ class VolatileValue(object):
 
     def __str__(self):
         return str(self.get_val())
+
+    def __int__(self):
+        return int(self.get_val())
 
 class PerfRepoAPI(object):
     def __init__(self):

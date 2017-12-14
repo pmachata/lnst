@@ -829,6 +829,26 @@ class Interface(object):
                                           self._id)
         return stats
 
+    def set_qdisc_red(self, limit, avpkt, _min, _max, **args):
+        self._machine._rpc_call_x(self._netns, "set_qdisc_red", self._id, limit, avpkt,
+                                  _min, _max, args)
+
+    def unset_qdisc_red(self):
+        self._machine._rpc_call_x(self._netns, "unset_qdisc_red", self._id)
+
+    def qdisc_red_stats(self):
+        return self._machine._rpc_call_x(self._netns, "qdisc_red_stats",
+                                         self._id)
+
+    def collect_qdisc_red_stats(self):
+        self._machine._rpc_call_x(self._netns, "collect_qdisc_red_stats",
+                                  self._id)
+
+    def stop_collecting_qdisc_red_stats(self):
+        return self._machine._rpc_call_x(self._netns,
+                                         "stop_collecting_qdisc_red_stats",
+                                         self._id)
+
     def set_addresses(self, ips):
         self._addresses = ips
         self._machine._rpc_call_x(self._netns, "set_addresses",
