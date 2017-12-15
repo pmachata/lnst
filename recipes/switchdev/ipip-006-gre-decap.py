@@ -23,9 +23,11 @@ def do_task(ctl, hosts, ifaces, aliases):
      sw_if1_10, sw_if1_20,
      sw_if2_10, sw_if2_20) = ifaces
 
-    for m in m1, m2, sw:
-	for scope in "all", "default":
-	    m.config("/proc/sys/net/ipv4/conf/%s/rp_filter" % scope, "0")
+    for m, scopes in {m1: ("all", m1_if1_10.get_devname()),
+                      m2: ("all", m2_if1_20.get_devname()),
+                      sw: ("all", "default")}.items():
+        for scope in scopes:
+            m.config("/proc/sys/net/ipv4/conf/%s/rp_filter" % scope, "0")
 
     m2_if1_10.add_nhs_route("1.2.3.4/32", [ipv4(unet_ip(ctl, 1, []))])
     m2_gre1 = m2.get_interface("gre1")
