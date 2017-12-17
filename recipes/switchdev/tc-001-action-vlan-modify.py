@@ -35,7 +35,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     q2 = Qdisc(sw_if2, 0xffff, "ingress")
     q2.filter_add("protocol all flower skip_sw action vlan modify id 85")
 
-    sleep(10)
+    sleep(30)
 
     tl = TestLib(ctl, aliases)
     tl.ping_simple(m1_if1_85, m2_if1_65)
