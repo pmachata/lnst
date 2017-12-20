@@ -786,7 +786,7 @@ class Device(object):
         except ExecCmdFail:
             return {}
 
-        p = r"[.\n]*?qdisc red .+?(offload)?\s*\n\s*Sent " \
+        p = r"[.\n]*?qdisc red .+?(offloaded)? limit.*?\n\s*Sent " \
             r"(?P<tx_bytes>\d+) bytes (?P<tx_packets>\d+) pkt \(dropped " \
             r"(?P<drops>\d+), overlimits (?P<overlimits>\d+).*\n\s*backlog " \
             r"(?P<backlog>\d+\w?)b.*\n.*?marked (?P<marked>\d+) early " \
@@ -799,7 +799,7 @@ class Device(object):
         stats = {key: int(val.replace("K", "000").replace("M", "000000"))
                 for key, val in stats_raw.groupdict().iteritems()}
 
-        stats["offload"] = "offload" in stats_raw.groups()
+        stats["offload"] = "offloaded" in stats_raw.groups()
         stats["devname"] = self._name
         stats["hwaddr"] = self._hwaddr
         return stats
