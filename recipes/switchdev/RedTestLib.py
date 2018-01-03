@@ -150,7 +150,7 @@ class RedTestLib:
             results.check_stats_minimal(self.generic_error_function)
             errors = results.compare_stats(drops, tx_packets, self.threshold)
             for err_msg in errors:
-                generic_error_function(err_msg)
+                self.generic_error_function(err_msg)
         else:
             stats = {"drops": drops, "tx_packets": tx_packets}
             results = RedTestResults(stats, [])
