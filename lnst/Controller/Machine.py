@@ -989,11 +989,12 @@ class Interface(object):
         if not self._configured:
             return
 
-        while self._routes != []:
-            if self._routes[1] == None:
-                del_route(self._routes[0], self._routes[2])
-            else:
-                del_route(self._routes[0], self._routes[1], self._routes[2])
+	while len(self._routes):
+		route = self._routes[0]
+		if route[1] == None:
+			self.del_route(route[0], route[2])
+		else:
+			self.del_nhs_route(route[0], route[1], route[2])
 
         self._machine._rpc_call_x(self._netns, "deconfigure_interface",
                                   self.get_id())
