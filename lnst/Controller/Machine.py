@@ -998,8 +998,7 @@ class Interface(object):
         self._machine._rpc_call_x(self._netns, "deconfigure_interface",
                                   self.get_id())
         if self._netns != None:
-            self._machine._rpc_call_to_netns(self._netns,
-                                         "return_if_netns", self.get_id())
+            self._machine._rpc_call("return_if_netns", self.get_id())
         self._configured = False
 
     def add_br_vlan(self, br_vlan_info):
