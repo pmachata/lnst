@@ -873,19 +873,19 @@ class Device(object):
         exec_cmd("ip %s route add %s dev %s" % ("-6" if ipv6 else "", dest, self._name))
 
     def del_route(self, dest, ipv6):
-        exec_cmd("ip %s route del %s dev %s" % ("-6" if ipv6 else "", dest, self._name))
+        exec_cmd("ip %s route del %s dev %s" % ("-6" if ipv6 else "", dest, self._name), die_on_err=False)
 
-    def route_cmd(self, cmd, dest, nhs, ipv6):
+    def route_cmd(self, cmd, dest, nhs, ipv6, die_on_err=True):
         cmd = "ip %s route %s %s" % ("-6" if ipv6 else "", cmd, dest)
         for ns in nhs:
             cmd = cmd + (" \\\n   nexthop via %s" % ns)
-        exec_cmd(cmd)
+        exec_cmd(cmd, die_on_err)
 
     def add_nhs_route(self, dest, nhs, ipv6):
         self.route_cmd("add", dest, nhs, ipv6)
 
     def del_nhs_route(self, dest, nhs, ipv6):
-        self.route_cmd("del", dest, nhs, ipv6)
+        self.route_cmd("del", dest, nhs, ipv6, die_on_err=False)
 
     def set_netns(self, netns):
         self._netns = netns
