@@ -33,7 +33,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     m2_if.set_addresses(test_ip(1, 2))
     m3_if.set_addresses(test_ip(1, 3))
     m4_if.set_addresses(test_ip(1, 4))
-    sleep(15)
+    sleep(30)
 
     tl = TestLib(ctl, aliases)
     for iface in [m1_if, m2_if, m3_if, m4_if]:

@@ -42,7 +42,7 @@ def do_task(ctl, hosts, ifaces, host_br, aliases):
         iface.set_mcast_router(MCAST_ROUTER_PORT.FIXED_OFF)
 
     sw_if1.set_mcast_router(MCAST_ROUTER_PORT.LEARNING)
-    sleep(15)
+    sleep(30)
 
     s_procs = tl.iperf_mc_listen(m3_if, mcgrp(1))
     tl._ctl.wait(2)
