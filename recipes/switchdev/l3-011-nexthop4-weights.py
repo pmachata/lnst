@@ -32,7 +32,7 @@ def pktgen(ctl, if1, if2, neigh_mac):
 
         pktgen_option = ["pkt_size {}".format(if1.get_mtu()),
                          "clone_skb 0",
-                         "count {}".format(10 * 10 ** 6),
+                         "count {}".format(20 * 10 ** 6),
                          "dst_mac {}".format(neigh_mac),
                          "dst {}".format(if2.get_ip(1)),
                          "udp_src_min 1024", "udp_src_max 4096",
