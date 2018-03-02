@@ -20,14 +20,15 @@ class MirredPort:
         self.mach = mirred_port.get_host()
 
     def create_mirror(self, to_port, ingress = False,
-                      pref = 1):
+                      pref = 1, expect = "pass"):
         ingress_str = "ingress" if ingress else "egress"
         from_dev = self.mirred_port.get_devname()
         to_dev = to_port.get_devname()
 
         self.mach.run("tc filter add dev %s %s pref %d matchall"
                       " skip_sw action mirred egress mirror dev %s"
-                      % (from_dev, ingress_str, pref, to_dev))
+                      % (from_dev, ingress_str, pref, to_dev),
+                      expect=expect)
 
     def remove_mirror(self, to_port, ingress = False, pref = 1):
         from_dev = self.mirred_port.get_devname()
@@ -123,6 +124,17 @@ def do_task(ctl, hosts, ifaces, aliases):
 	    mirred_port.remove_mirror(sw_if3, ingress=True)
 	if mirror_status["egress"]:
 	    mirred_port.remove_mirror(sw_if3, ingress=False)
+
+        # Create a conflicting mirror. mlxsw can't offload this and should
+        # reject. Note that the combination of ingress and egress (which is
+        # valid) is tested above.
+        mirred_port.create_mirror(sw_if3, ingress=True, pref=1)
+        mirred_port.create_mirror(sw_if3, ingress=True, pref=2, expect="fail")
+        mirred_port.remove_mirror(sw_if3, ingress=True, pref=1)
+
+        mirred_port.create_mirror(sw_if3, ingress=False, pref=1)
+        mirred_port.create_mirror(sw_if3, ingress=False, pref=2, expect="fail")
+        mirred_port.remove_mirror(sw_if3, ingress=False, pref=1)
 
     return 0
 
