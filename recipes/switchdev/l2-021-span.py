@@ -29,15 +29,15 @@ class MirredPort:
         from_dev = self.mirred_port.get_devname()
         to_dev = to_port.get_devname()
 
-        self.mach.run("tc filter add dev %s %s pref %d matchall \
-                       skip_sw action mirred egress mirror dev %s" % (from_dev,
-                       ingress_str, pref, to_dev))
+        self.mach.run("tc filter add dev %s %s pref %d matchall"
+                      " skip_sw action mirred egress mirror dev %s"
+                      % (from_dev, ingress_str, pref, to_dev))
 
     def remove_mirror(self, to_port, ingress = False, pref = 1):
         from_dev = self.mirred_port.get_devname()
         ingress_str = "ingress" if ingress else "egress"
-        self.mach.run("tc filter del dev %s pref %d %s" % (from_dev,
-                      pref, ingress_str))
+        self.mach.run("tc filter del dev %s pref %d %s"
+                      % (from_dev, pref, ingress_str))
 
 def _run_packet_assert(num, main_if, from_addr, to_addr):
     mach = main_if.get_host()
