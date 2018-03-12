@@ -91,7 +91,6 @@ class BridgeTool:
         return br_fdb_info_list
 
     def _add_del_mdb(self, op, br_mdb_info):
-        print (op, self._dev_name, br_mdb_info["hwaddr"], br_mdb_info["group"])
         cmd = "bridge mdb %s dev %s port %s grp %s" % \
               (op, self._dev_name, br_mdb_info["hwaddr"], br_mdb_info["group"])
         exec_cmd(cmd)
