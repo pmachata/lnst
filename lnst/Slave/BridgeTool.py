@@ -93,6 +93,9 @@ class BridgeTool:
     def _add_del_mdb(self, op, br_mdb_info):
         cmd = "bridge mdb %s dev %s port %s grp %s" % \
               (op, self._dev_name, br_mdb_info["hwaddr"], br_mdb_info["group"])
+        if br_mdb_info.has_key("permanent") and \
+           br_mdb_info["permanent"] == True:
+            cmd += " permanent"
         exec_cmd(cmd)
 
     def add_mdb(self, br_mdb_info):
@@ -100,6 +103,9 @@ class BridgeTool:
 
     def del_mdb(self, br_mdb_info):
         return self._add_del_mdb("del", br_mdb_info)
+
+    def show_mdb(self):
+        return exec_cmd("bridge mdb show dev %s" % self._dev_name)[0]
 
     def _set_link(self, attr, br_link_info):
         cmd = "bridge link set dev %s %s" % (self._dev_name, attr)
@@ -139,4 +145,14 @@ class BridgeTool:
     def set_mcast_querier(self, set_on = True):
         cmd = "ip link set %s type bridge mcast_querier %d" % (self._dev_name,
                                                                 set_on)
+        exec_cmd(cmd)
+
+    def set_mcast_hash_max(self, hash_max):
+        cmd = "ip link set %s type bridge mcast_hash_max %d" % (self._dev_name,
+                                                                hash_max)
+        exec_cmd(cmd)
+
+    def set_mcast_hash_elasticity(self, hash_elasticity):
+        cmd = "ip link set %s type bridge mcast_hash_elasticity %d" % (
+              self._dev_name, hash_elasticity)
         exec_cmd(cmd)

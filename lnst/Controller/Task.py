@@ -799,11 +799,16 @@ class InterfaceAPI(object):
     def get_br_fdbs(self):
         return self._if.get_br_fdbs()
 
-    def add_br_mdb(_self, hwaddr, group):
-        _self._if.add_br_mdb({"hwaddr": hwaddr, "group": group})
+    def add_br_mdb(_self, hwaddr, group, permanent=False):
+        _self._if.add_br_mdb({"hwaddr": hwaddr, "group": group,
+                               "permanent": permanent})
 
-    def del_br_mdb(_self, hwaddr, group):
-        _self._if.del_br_mdb({"hwaddr": hwaddr, "group": group})
+    def del_br_mdb(_self, hwaddr, group, permanent=False):
+        _self._if.del_br_mdb({"hwaddr": hwaddr, "group": group,
+                              "permanent": permanent})
+
+    def show_br_mdb(_self):
+        return _self._if.show_br_mdb()
 
     def set_br_learning(_self, on=True, self=False, master=False):
         _self._if.set_br_learning({"on": on, "self": self, "master": master})
@@ -823,6 +828,12 @@ class InterfaceAPI(object):
 
     def set_br_mcast_querier(_self, set_on = True):
         _self._if.set_br_mcast_querier(set_on)
+
+    def set_br_mcast_hash_max(_self, hash_max):
+        _self._if.set_br_mcast_hash_max(hash_max)
+
+    def set_br_mcast_hash_elasticity(_self, hash_elasticity):
+        _self._if.set_br_mcast_hash_elasticity(hash_elasticity)
 
     def set_mcast_flood(self, on):
         return self._if.set_mcast_flood(on)

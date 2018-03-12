@@ -7,4 +7,5 @@
     <alias name="tx_prio_stats" value="tx_frames_prio_" />
     <alias name="speed_hi" value="40000" />
     <alias name="speed_lo" value="10000" />
+    <alias name="max_mdb" value="7000" />
 </define>

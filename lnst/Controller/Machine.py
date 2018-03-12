@@ -1032,6 +1032,10 @@ class Interface(object):
         self._machine._rpc_call_x(self._netns, "del_br_mdb",
                                   self._id, br_mdb_info)
 
+    def show_br_mdb(self):
+        return self._machine._rpc_call_x(self._netns, "show_br_mdb",
+                                  self._id)
+
     def set_br_learning(self, br_learning_info):
         self._machine._rpc_call_x(self._netns, "set_br_learning", self._id,
                                   br_learning_info)
@@ -1055,6 +1059,14 @@ class Interface(object):
     def set_br_mcast_querier(self, set_on):
         self._machine._rpc_call_x(self._netns, "set_br_mcast_querier", self._id,
                                   set_on)
+
+    def set_br_mcast_hash_max(self, hash_max):
+        self._machine._rpc_call_x(self._netns, "set_br_mcast_hash_max",
+                                  self._id, hash_max)
+
+    def set_br_mcast_hash_elasticity(self, hash_elasticity):
+        self._machine._rpc_call_x(self._netns, "set_br_mcast_hash_elasticity",
+                                  self._id, hash_elasticity)
 
     def set_mcast_flood(self, on):
         self._machine._rpc_call_x(self._netns, "set_mcast_flood", self._id, on)
