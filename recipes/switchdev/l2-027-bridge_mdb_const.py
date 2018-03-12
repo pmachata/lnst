@@ -37,10 +37,13 @@ def test_standard_multicast(tl, sender, listeners, group, sw_br,
     expected = [False for i in bridged]
     tl.mc_ipref_compare_result(bridged, res, expected)
 
-def do_task(ctl, hosts, ifaces, aliases):
+def do_task(ctl, hosts, ifaces, bridges, aliases):
     m1, m2, sw = hosts
     m1_if, m2_if, m3_if, m4_if, sw_if1, sw_if2, sw_if3, sw_if4 = ifaces
     peers = {m1_if: sw_if1, m2_if: sw_if2, m3_if: sw_if3, m4_if: sw_if4}
+
+    for bridge in bridges:
+        bridge.set_br_mcast_snooping(False)
 
     # Create a bridge
     sw_ports = peers.values()
@@ -78,4 +81,8 @@ do_task(ctl, [ctl.get_host("machine1"),
          ctl.get_host("switch").get_interface("if2"),
          ctl.get_host("switch").get_interface("if3"),
          ctl.get_host("switch").get_interface("if4")],
+        [ctl.get_host("machine1").get_interface("brif1"),
+         ctl.get_host("machine1").get_interface("brif2"),
+         ctl.get_host("machine2").get_interface("brif1"),
+         ctl.get_host("machine2").get_interface("brif2")],
         ctl.get_aliases())
