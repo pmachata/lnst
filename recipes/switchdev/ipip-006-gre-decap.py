@@ -1,5 +1,5 @@
 """
-Copyright 2017 Mellanox Technologies. All rights reserved.
+Copyright 2017, 2018 Mellanox Technologies. All rights reserved.
 Licensed under the GNU General Public License, version 2 as
 published by the Free Software Foundation; see COPYING for details.
 """
@@ -53,7 +53,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
             # Make sure that downing a tunnel makes the decap flow stop working.
             logging.info("--- set a tunnel down")
@@ -62,7 +62,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       count=25, fail_expected=True, ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g,
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g,
                       count=25, fail_expected=True)
 
         # `g' is now down, and no local decap route exists, because `d' went
@@ -74,7 +74,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
         ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                   count=25, fail_expected=True, ipv6=True)
-        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g,
+        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g,
                   count=25, fail_expected=True)
 
         # Now set the tunnel back up and test that it again all works.
@@ -83,7 +83,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
         ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                   ipv6=True)
-        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
+        ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
     with vrf(sw) as vrf_u, \
          vrf(sw) as vrf_o, \
@@ -106,7 +106,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
             # Make sure that downing an underlay device doesn't make the decap
             # flow stop working. There is a complementary test in ipip-010 to
@@ -117,7 +117,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
         # Make sure that when a newly-created tunnel has a down underlay, decap
         # still works. There's a complementary test in ipip-010 to test that
@@ -132,7 +132,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
-            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), m2_gre1, g)
+            ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),

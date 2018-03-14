@@ -1,7 +1,7 @@
 """
 A helper module for IP-in-IP tests.
 
-Copyright 2017 Mellanox Technologies. All rights reserved.
+Copyright 2017, 2018 Mellanox Technologies. All rights reserved.
 Licensed under the GNU General Public License, version 2 as
 published by the Free Software Foundation; see COPYING for details.
 """
@@ -24,9 +24,11 @@ def ping_test(tl, m1, sw, addr, m1_if1, gre,
         "addr": addr,
         "count": count,
         "interval": 0.2,
-        "iface" : m1_if1.get_devname(),
         "limit_rate": limit,
     }
+    if m1_if1 is not None:
+        options["iface"] = m1_if1.get_devname()
+
     if ttl is not None:
         options["ttl"] = ttl
     ping_mod = ctl.get_module("IcmpPing" if not ipv6 else "Icmp6Ping",
