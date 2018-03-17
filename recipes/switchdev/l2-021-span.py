@@ -22,24 +22,22 @@ class MirredPort:
         self.mach = mach
 
         mach.run("tc qdisc add dev %s clsact" % devname)
-        self.pref = [1, 1]
 
-    def create_mirror(self, to_port, ingress = False):
+    def create_mirror(self, to_port, ingress = False,
+                      pref = 1):
         ingress_str = "ingress" if ingress else "egress"
         from_dev = self.mirred_port.get_devname()
         to_dev = to_port.get_devname()
 
         self.mach.run("tc filter add dev %s %s pref %d matchall \
                        skip_sw action mirred egress mirror dev %s" % (from_dev,
-                       ingress_str, self.pref[ingress], to_dev))
-        self.pref[ingress] += 1
+                       ingress_str, pref, to_dev))
 
-    def remove_mirror(self, to_port, ingress = False):
+    def remove_mirror(self, to_port, ingress = False, pref = 1):
         from_dev = self.mirred_port.get_devname()
         ingress_str = "ingress" if ingress else "egress"
-        self.pref[ingress] -= 1
         self.mach.run("tc filter del dev %s pref %d %s" % (from_dev,
-                      self.pref[ingress], ingress_str))
+                      pref, ingress_str))
 
 def _run_packet_assert(num, main_if, from_addr, to_addr):
     mach = main_if.get_host()
