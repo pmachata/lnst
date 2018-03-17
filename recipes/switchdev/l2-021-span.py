@@ -1,5 +1,5 @@
 """
-Copyright 2016 Mellanox Technologies. All rights reserved.
+Copyright 2016, 2018 Mellanox Technologies. All rights reserved.
 Licensed under the GNU General Public License, version 2 as
 published by the Free Software Foundation; see COPYING for details.
 """
@@ -16,12 +16,8 @@ import random
 
 class MirredPort:
     def __init__(self, mirred_port):
-        mach = mirred_port.get_host()
-        devname = mirred_port.get_devname()
         self.mirred_port = mirred_port
-        self.mach = mach
-
-        mach.run("tc qdisc add dev %s clsact" % devname)
+        self.mach = mirred_port.get_host()
 
     def create_mirror(self, to_port, ingress = False,
                       pref = 1):
@@ -38,6 +34,15 @@ class MirredPort:
         ingress_str = "ingress" if ingress else "egress"
         self.mach.run("tc filter del dev %s pref %d %s"
                       % (from_dev, pref, ingress_str))
+
+    def __enter__(self):
+        devname = self.mirred_port.get_devname()
+        self.mach.run("tc qdisc add dev %s clsact" % devname)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        devname = self.mirred_port.get_devname()
+        self.mach.run("tc qdisc del dev %s clsact" % devname)
 
 def _run_packet_assert(num, main_if, from_addr, to_addr):
     mach = main_if.get_host()
@@ -95,25 +100,25 @@ def do_task(ctl, hosts, ifaces, aliases):
     m2_if2.set_link_up()
     sw.create_bridge(slaves=[sw_if1, sw_if2], options={"vlan_filtering": 1,
                                                        "multicast_snooping": 0})
-    mirred_port = MirredPort(sw_if2)
+    with MirredPort(sw_if2) as mirred_port:
+        sleep(30)
 
-    sleep(30)
+        mirror_status = {"ingress": False, "egress": False }
+        for i in range(10):
+            change = random.choice(mirror_status.keys())
+            change_mirror_status(mirror_status, change, mirred_port, sw_if3)
 
-    mirror_status = {"ingress": False, "egress": False }
-    for i in range(10):
-        change = random.choice(mirror_status.keys())
-        change_mirror_status(mirror_status, change, mirred_port, sw_if3)
+            in_num = 10 if mirror_status["ingress"] else 0
+            out_num = 10 if mirror_status["egress"] else 0
 
-        in_num = 10 if mirror_status["ingress"] else 0
-        out_num = 10 if mirror_status["egress"] else 0
+            assert_procs = run_packet_assert(in_num, m2_if2, m2_if1, m1_if1,
+                                             aliases["ipv"])
+            assert_procs += run_packet_assert(out_num, m2_if2, m1_if1, m2_if1,
+                                              aliases["ipv"])
+            tl.ping_simple(m1_if1, m2_if1, count=10)
+            for assert_proc in assert_procs:
+                assert_proc.intr()
 
-        assert_procs = run_packet_assert(in_num, m2_if2, m2_if1, m1_if1,
-                                         aliases["ipv"])
-        assert_procs += run_packet_assert(out_num, m2_if2, m1_if1, m2_if1,
-                                         aliases["ipv"])
-        tl.ping_simple(m1_if1, m2_if1, count=10)
-        for assert_proc in assert_procs:
-            assert_proc.intr()
 
     return 0
 
