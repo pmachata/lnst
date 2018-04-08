@@ -13,6 +13,7 @@ from TestLib import TestLib
 from time import sleep
 import random
 import logging
+import re
 
 def test_ip(major, minor):
     return ["192.168.10%d.%d/24" % (major, minor)]
@@ -59,7 +60,7 @@ def do_task(ctl, hosts, ifaces, bridges, aliases):
     tl = TestLib(ctl, aliases)
     tl.check_cpu_traffic(sw_ports, test=False)
 
-    used_mdb = max(8, len(sw_br.show_br_mdb().split("\n")))
+    used_mdb = max(8, sw_br.show_br_mdb().count("offload") + 2)
     max_mdb = int(aliases["max_mdb"]) - used_mdb
     bridged = [m2_if, m3_if, m4_if]
     logging.info("Add %d mdb entries" % max_mdb)
@@ -73,17 +74,20 @@ def do_task(ctl, hosts, ifaces, bridges, aliases):
 
     msg = ""
     logging.info("Check mdb entries are offloaded")
+    pattern = "(?:dev)?\s*?%s (?:port)?\s*? (\S+)\s+(?:grp)?\s*?(\S+) \s*permanent\s* offload" % (
+               str(sw_br.get_devname()))
+    p = re.compile(pattern)
+    mdb_pairs = p.findall(mdb_str)
     for i in range(max_mdb):
         group = mcgrp(i)
         listeners = get_listeners(i, bridged)
         for l in listeners:
-            pattern = "dev %s port %s grp %s permanent offload" % (
-                    str(sw_br.get_devname()), str(peers[l].get_devname()),
-                    group)
-            if pattern not in mdb_str:
+            if not (str(peers[l].get_devname()), group) in mdb_pairs:
                 msg = "mdb entry %d: group %s port %s was not offloaded" % (
                        i, group, str(peers[l].get_devname()))
                 break
+        if msg:
+            break
 
     tl.custom(sw, "Check mdb was offloaded", msg)
 
