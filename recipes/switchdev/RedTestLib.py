@@ -73,6 +73,8 @@ class RedTestLib:
         self.ingress_port = self.ports[1]
         self.egress_port.set_speed(self.speed_base)
         self.ingress_port.set_speed(aliases["speed_hi"])
+        logging.info("create bottleneck of %s to %d" % (aliases["speed_hi"],
+                                                        self.speed_base))
 
     def set_traffic_ecn_enable(self):
         self.tos = '01'
@@ -102,6 +104,9 @@ class RedTestLib:
 
     def set_lower_rate(self):
         self.rate *= 0.9
+        if self.rate <= self.speed_base * 0.6:
+            logging.error("tune low rate got to too low speed. Terminate test")
+            raise Exception("Tune low rate loop")
         logging.info("New rate is %d M" % self.rate)
 
     def set_high_rate(self):
@@ -110,6 +115,9 @@ class RedTestLib:
 
     def set_higher_rate(self):
         self.rate *= 1.1
+        if self.rate >= self.speed_base * 1.5:
+            logging.error("tune high rate got to too high speed. Terminate test")
+            raise Exception("Tune high rate loop")
         logging.info("New rate is %d M" % self.rate)
 
     def check_stats_were_offloaded(self, stats):
