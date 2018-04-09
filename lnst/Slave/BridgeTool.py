@@ -14,6 +14,51 @@ from lnst.Common.NetUtils import normalize_hwaddr
 from lnst.Common.ExecCmd import exec_cmd
 import re
 
+
+def get_untagged_vlans(vlans):
+    br_vlan_info_list = []
+    vlans_untagged = re.findall('\d+\suntagged', vlans)
+
+    for vlan_item in vlans_untagged:
+        match = re.match('\d+', vlan_item)
+        if (match):
+            vlan_id = int(match.group())
+            br_vlan_info = {"vlan_id": vlan_id, "pvid": False, "untagged": True}
+            br_vlan_info_list.append(br_vlan_info)
+
+    return br_vlan_info_list
+
+def get_tagged_vlans(vlans):
+    br_vlan_info_list = []
+    vlans_tagged_str = re.sub('\d+\s+PVID|\d+\s+untagged', "", vlans)
+    vlans_tagged = re.findall('\d+', vlans_tagged_str)
+    for vlan_id in vlans_tagged:
+        br_vlan_info = {"vlan_id": int(vlan_id), "pvid": False, "untagged": False}
+        br_vlan_info_list.append(br_vlan_info)
+
+    return br_vlan_info_list
+
+def get_pvid(vlans):
+    br_vlan_info = None
+    pvid_tagged = False
+    pvid_untagged = re.search('\d+\sPVID\suntagged', vlans)
+    if pvid_untagged:
+        match = re.match('\d+', pvid_untagged.group())
+        vlan_id = int(match.group())
+        untagged = True
+        br_vlan_info = {"vlan_id": vlan_id, "pvid": True, "untagged": True}
+    else:
+        pvid_tagged = re.search('\d+\sPVID\s', vlans)
+        if (pvid_tagged):
+            match = re.match('\d+', pvid_tagged.group())
+            vlan_id = int(match.group())
+            untagged = False
+
+    if (pvid_tagged or pvid_untagged):
+        br_vlan_info = {"vlan_id": vlan_id, "pvid": True, "untagged": untagged}
+
+    return br_vlan_info
+
 class BridgeTool:
     def __init__(self, dev_name):
         self._dev_name = dev_name
@@ -41,16 +86,18 @@ class BridgeTool:
         output = exec_cmd("bridge vlan show dev %s" % self._dev_name,
                           die_on_err=False)[0]
         br_vlan_info_list = []
-        for line in output.split("\n"):
-            match = re.match(r'.*\s+(\d+)', line)
-            if match:
-                vlan_id = int(match.groups()[0])
-                pvid = True if re.match(r'.*\s+PVID', line) else False
-                untagged = True if re.match(r'.*\s+Egress Untagged', line) \
-                                else False
-                br_vlan_info = {"vlan_id": vlan_id, "pvid": pvid,
-                                "untagged": untagged}
-                br_vlan_info_list.append(br_vlan_info)
+        lines = output.split("\n")
+        vlans = lines[2]
+
+        br_vlan_info = get_pvid(vlans)
+        br_vlan_info_list.append(br_vlan_info)
+
+        br_untagged_vlan_info_list = get_untagged_vlans(vlans)
+        br_vlan_info_list.extend(br_untagged_vlan_info_list)
+
+        br_tagged_vlan_info_list = get_tagged_vlans(vlans)
+        br_vlan_info_list.extend(br_tagged_vlan_info_list)
+
         return br_vlan_info_list
 
     def _add_del_fdb(self, op, br_fdb_info):
