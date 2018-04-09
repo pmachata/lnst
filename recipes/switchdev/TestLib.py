@@ -18,10 +18,11 @@ class RunCmdException(Exception):
     pass
 
 class TestLib:
-    def __init__(self, ctl, aliases):
+    def __init__(self, ctl, aliases, ifaces=None):
         self._ctl = ctl
         self._ipv = "both" # aliases["ipv"]
         self._mtu = int(aliases["mtu"])
+        self._ifaces = ifaces
         if "netperf_duration" in aliases:
             self._netperf_duration = int(aliases["netperf_duration"])
         if "netperf_num_parallel" in aliases:
@@ -82,6 +83,12 @@ class TestLib:
             if1.set_link_down()
 
         m2.run(linkneg_mod, desc=desc, netns=if2.get_netns())
+
+    def link_status_show(self):
+
+        for iface in self._ifaces:
+            m = iface.get_host()
+            m.run("ip link show %s" % iface.get_devname())
 
     def ping_simple(self, if1, if2, fail_expected=False, desc=None,
                     limit_rate=90, count=20, interval=0.1):
