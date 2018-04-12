@@ -434,6 +434,7 @@ class Machine(object):
         try:
             cmd_res = self._rpc_call_x(netns, "run_command", command)
         except MachineError as exc:
+	    logging.info("Exception: %s" % exc)
             if "proc_id" in command:
                 cmd_res = self._rpc_call_x(netns, "kill_command",
                                            command["proc_id"])
