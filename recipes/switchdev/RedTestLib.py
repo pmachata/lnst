@@ -43,22 +43,39 @@ class RedTestResults:
                         self.stats["drops"]))
         return err
 
+def test_ip(major, minor, prefix=24):
+    return "192.168.10%d.%d%s" % (major, minor,
+        "/" + str(prefix) if prefix > 0 else "")
+
 class RedTestLib:
-    def __init__(self, tl, switch, links):
+    def __init__(self, tl, switch, links, router=False):
         self.tl = tl
         self.switch = switch
         self.links = links
         self.ports = links.keys()
-        self.switch.create_bridge(slaves=self.ports,
-                                  options={"vlan_filtering": 1})
+        self.router = router
+        if router:
+            self.ports[0].reset(ip=test_ip(2,1))
+            links[self.ports[0]].reset(ip=test_ip(2,2))
+            self.ports[1].reset(ip=test_ip(1,1))
+            links[self.ports[1]].reset(ip=test_ip(1,2))
+            links[self.ports[0]].add_nhs_route(test_ip(1,0),
+                                               [test_ip(2,1,0)])
+            links[self.ports[1]].add_nhs_route(test_ip(2,0),
+                                               [test_ip(1,1,0)])
+        else:
+            self.switch.create_bridge(slaves=self.ports,
+                                      options={"vlan_filtering": 1})
         self.rate = 0
         self.threshold = 100
         self.speed_base = 1000
         self.min = 0
         self.max = 0
         self.rate = self.speed_base
-        self.set_traffic_ecn_enable()
+        self.ecn = True
+        self.tos = 0
         self.parent = None
+        self.configs = {self.parent: (self.rate, self.min, self.max)}
 
     # To be used to report about problem that shouldn't occur.
     def generic_error_function(self, msg):
@@ -88,21 +105,29 @@ class RedTestLib:
                                                         self.speed_base))
 
     def choose_parent(self, parent):
+        self.configs[self.parent] = (self.rate, self.min, self.max)
         self.parent = parent
+        if self.configs.has_key(self.parent):
+            self.rate, self.min, self.max = self.configs[self.parent]
+        else:
+            self.rate, self.min, self.max = self.speed_base, 0, 0
 
     def set_traffic_ecn_enable(self):
-        self.tos = '01'
+        self.ecn = True
         logging.info("traffic will be ecn enabled")
 
     def set_traffic_ecn_disable(self):
-        self.tos = '00'
+        self.ecn = False
         logging.info("traffic will be ecn disabled")
+
+    def set_traffic_tos(self, tos):
+        self.tos = tos
 
     def set_red(self, min, max, prob=None, ecn=False, parent=None):
         limit = max * 4
         avpkt = 1000
         if parent and parent != self.parent:
-            self.parent = parent
+            self.choose_parent(parent)
 
         self.egress_port.set_qdisc_red(limit, avpkt, min, max, ecn=ecn,
                                        parent=self.parent)
@@ -111,7 +136,10 @@ class RedTestLib:
         self.min = min
         self.max = max
 
-    def set_no_red(self):
+    def set_no_red(self, parent=None):
+        if parent and parent != self.parent:
+            self.choose_parent(parent)
+
         self.min = 0
         self.max = 0
         self.egress_port.unset_qdisc(parent=self.parent)
@@ -158,9 +186,13 @@ class RedTestLib:
         if is_red: # if RED is enabled
             self.egress_port.collect_qdisc_red_stats(parent=self.parent)
 
+        args = {"count":10**6, "rate":str(self.rate)+"M"}
+        args["tos"] = "%02d" % ((self.tos << 2) + self.ecn)
+        if self.router:
+            args["dst"] = self.links[self.egress_port].get_ip()
+            args["dst_mac"] = self.ingress_port.get_hwaddr()
         self.tl.pktgen(self.links[self.ingress_port],
-                       self.links[self.egress_port], pkt_size, count=10**6,
-                       rate=str(self.rate)+"M", tos=self.tos)
+                       self.links[self.egress_port], pkt_size, **args)
         sleep(3)
 
         rx_after = self.ingress_port.link_stats()["rx_packets"]
@@ -357,6 +389,7 @@ class RedTestLib:
         pkt_size = self.links[self.ingress_port].get_mtu()
         self.tl.pktgen(self.links[self.ingress_port],
                        self.links[self.egress_port], pkt_size, count=10**6,
-                       tos=self.tos, rate=str(self.rate)+"M")
+                       rate=str(self.rate)+"M",
+                       tos="%02d"%((self.tos<<2)+self.ecn))
         proc.intr()
 
