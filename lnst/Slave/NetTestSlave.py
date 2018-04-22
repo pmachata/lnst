@@ -204,6 +204,15 @@ class SlaveMethods:
             return {}
         return dev.link_cpu_ifstat()
 
+    def set_qdisc_prio(self, if_id, bands = None, priomap = None,
+                       change = False):
+        dev = self._if_manager.get_mapped_device(if_id)
+        if dev is None:
+            logging.error("Device with id '%s' not found." % if_id)
+            return False
+        dev.set_qdisc_prio(bands, priomap, change)
+        return True
+
     def set_qdisc_red(self, if_id, limit, avpkt, _min, _max, prob = 0,
                       ecn = False, change = False, burst = None):
         dev = self._if_manager.get_mapped_device(if_id)
@@ -213,12 +222,12 @@ class SlaveMethods:
         dev.set_qdisc_red(limit, avpkt, _min, _max, prob, ecn, change, burst)
         return True
 
-    def unset_qdisc_red(self, if_id):
+    def unset_qdisc(self, if_id):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:
             logging.error("Device with id '%s' not found." % if_id)
             return False
-        dev.unset_qdisc_red()
+        dev.unset_qdisc()
         return True
 
     def qdisc_red_stats(self, if_id):

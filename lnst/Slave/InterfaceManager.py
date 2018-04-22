@@ -764,6 +764,15 @@ class Device(object):
                     stats[field] += slave_stats[field]
         return stats
 
+    def set_qdisc_prio(self, bands = None, priomap = None, change = False):
+        cmd = "change" if change else "add"
+        cmd = "tc qdisc %s dev %s root handle 3: prio" % (cmd, self._name)
+        if bands:
+            cmd += " bands %d" % bands
+        if priomap:
+            cmd += " priomap %s" % priomap
+        exec_cmd(cmd)
+
     def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
                       change = False, burst = None):
         cmd = "change" if change else "add"
@@ -777,8 +786,8 @@ class Device(object):
             cmd += " burst %d" % burst
         exec_cmd(cmd)
 
-    def unset_qdisc_red(self):
-        exec_cmd("tc qdisc del dev %s root" % self._name)
+    def unset_qdisc(self):
+        exec_cmd("tc qdisc del dev %s root" % (self._name))
 
     def qdisc_red_stats(self):
         try:

@@ -96,7 +96,7 @@ class RedTestLib:
     def set_no_red(self):
         self.min = 0
         self.max = 0
-        self.egress_port.unset_qdisc_red()
+        self.egress_port.unset_qdisc()
 
     def set_low_rate(self):
         self.rate = self.speed_base * 0.99

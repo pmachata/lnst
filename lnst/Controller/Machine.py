@@ -830,13 +830,17 @@ class Interface(object):
                                           self._id)
         return stats
 
+    def set_qdisc_prio(self, bands = None, priomap = None, change = False):
+        self._machine._rpc_call_x(self._netns, "set_qdisc_prio",self._id, bands,
+                                  priomap, change)
+
     def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
                       change = False, burst = None):
         self._machine._rpc_call_x(self._netns, "set_qdisc_red", self._id, limit,
                                   avpkt, _min, _max, prob, ecn, change, burst)
 
-    def unset_qdisc_red(self):
-        self._machine._rpc_call_x(self._netns, "unset_qdisc_red", self._id)
+    def unset_qdisc(self):
+        self._machine._rpc_call_x(self._netns, "unset_qdisc", self._id)
 
     def qdisc_red_stats(self):
         return self._machine._rpc_call_x(self._netns, "qdisc_red_stats",

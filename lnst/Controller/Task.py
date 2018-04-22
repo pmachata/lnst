@@ -707,13 +707,16 @@ class InterfaceAPI(object):
     def link_cpu_ifstat(self):
         return self._if.link_cpu_ifstat()
 
+    def set_qdisc_prio(self, bands = None, priomap = None, change = False):
+        self._if.set_qdisc_prio(bands, priomap, change)
+
     def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
                       change = False, burst = None):
         self._if.set_qdisc_red(limit, avpkt, _min, _max, prob, ecn, change,
                                burst)
 
-    def unset_qdisc_red(self):
-        self._if.unset_qdisc_red()
+    def unset_qdisc(self):
+        self._if.unset_qdisc()
 
     def qdisc_red_stats(self):
         return self._if.qdisc_red_stats()
