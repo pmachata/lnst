@@ -830,9 +830,10 @@ class Interface(object):
                                           self._id)
         return stats
 
-    def set_qdisc_red(self, limit, avpkt, _min, _max, **args):
-        self._machine._rpc_call_x(self._netns, "set_qdisc_red", self._id, limit, avpkt,
-                                  _min, _max, args)
+    def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
+                      change = False, burst = None):
+        self._machine._rpc_call_x(self._netns, "set_qdisc_red", self._id, limit,
+                                  avpkt, _min, _max, prob, ecn, change, burst)
 
     def unset_qdisc_red(self):
         self._machine._rpc_call_x(self._netns, "unset_qdisc_red", self._id)
