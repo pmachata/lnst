@@ -48,13 +48,15 @@ def test_ip(major, minor, prefix=24):
         "/" + str(prefix) if prefix > 0 else "")
 
 class RedTestLib:
-    def __init__(self, tl, switch, links, router=False):
+    def __init__(self, tl, switch, links, router=False, no_init=False):
         self.tl = tl
         self.switch = switch
         self.links = links
         self.ports = links.keys()
         self.router = router
-        if router:
+        if no_init:
+            pass
+        elif router:
             self.ports[0].reset(ip=test_ip(2,1))
             links[self.ports[0]].reset(ip=test_ip(2,2))
             self.ports[1].reset(ip=test_ip(1,1))
@@ -104,6 +106,10 @@ class RedTestLib:
         logging.info("create bottleneck of %s to %d" % (aliases["speed_hi"],
                                                         self.speed_base))
 
+    def choose_bottleneck(self, ingress_port, egress_port):
+        self.ingress_port = ingress_port
+        self.egress_port = egress_port
+
     def choose_parent(self, parent):
         self.configs[self.parent] = (self.rate, self.min, self.max)
         self.parent = parent
@@ -133,6 +139,11 @@ class RedTestLib:
                                        parent=self.parent)
         stats = self.egress_port.qdisc_red_stats(parent=self.parent)
         self.check_stats_were_offloaded(stats)
+        if (stats["drops"] > self.threshold or
+            stats["tx_packets"] > self.threshold or
+            stats["early"] > self.threshold or
+            stats["backlog"] > self.threshold):
+            self.generic_error_function("Stats for new RED are not empty")
         self.min = min
         self.max = max
 
