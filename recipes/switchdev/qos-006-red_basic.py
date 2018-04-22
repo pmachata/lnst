@@ -35,6 +35,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     tl = TestLib(ctl, aliases)
     red_test = RedTestLib(tl, sw, {sw_if1:m1_if1, sw_if2:m2_if1})
     red_test.create_bottleneck(aliases)
+    if ctl.get_alias("use_prio_as_root"):
+        red_test.set_prio()
     sleep(30)
 
     try:
