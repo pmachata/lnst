@@ -91,7 +91,8 @@ class TestLib:
             m.run("ip link show %s" % iface.get_devname())
 
     def ping_simple(self, if1, if2, fail_expected=False, desc=None,
-                    limit_rate=90, count=20, interval=0.1):
+                    limit_rate=90, count=20, interval=0.1, tos=None,
+                    ipv4_only=False):
         if not desc:
             desc = self._generate_default_desc(if1, [if2])
 
@@ -101,23 +102,22 @@ class TestLib:
         m1 = if1.get_host()
         m1.sync_resources(modules=["Icmp6Ping", "IcmpPing"])
 
-        ping_mod = self._ctl.get_module("IcmpPing",
-                                        options={
-                                        "addr": if2.get_ip(0),
-                                        "count": count,
-                                        "interval": interval,
-                                        "iface" : if1.get_devname(),
-                                        "limit_rate": limit_rate})
+        options = {"count": count,
+                   "interval": interval,
+                   "iface" : if1.get_devname(),
+                   "limit_rate": limit_rate}
+        if tos:
+            options["tos"] = tos
 
-        ping_mod6 = self._ctl.get_module("Icmp6Ping",
-                                         options={
-                                         "addr": if2.get_ip(1),
-                                         "count": count,
-                                         "interval": interval,
-                                         "iface" : if1.get_devname(),
-                                         "limit_rate": limit_rate})
+        if self._ipv in [ 'ipv4', 'both' ]:
+            options["addr"] = if2.get_ip(0)
+            ping_mod = self._ctl.get_module("IcmpPing", options=options)
 
-        if self._ipv in [ 'ipv6', 'both' ]:
+        if self._ipv in [ 'ipv6', 'both' ] and not ipv4_only:
+            options["addr"] = if2.get_ip(1)
+            ping_mod6 = self._ctl.get_module("Icmp6Ping", options=options)
+
+        if self._ipv in [ 'ipv6', 'both' ] and not ipv4_only:
             m1.run(ping_mod6, fail_expected=fail_expected, desc=desc, netns=if1.get_netns())
 
         if self._ipv in [ 'ipv4', 'both' ]:
@@ -295,7 +295,8 @@ class TestLib:
         if not err:
             self.custom(iface.get_host(),  "cpu traffic", "")
 
-    def pktgen(self, if1, if2, pkt_size, desc=None, thread_option=[], **kwargs):
+    def pktgen(self, if1, if2, pkt_size, desc=None, thread_option=[], bg=False,
+               **kwargs):
         if1.set_mtu(self._mtu)
         m1 = if1.get_host()
         m1.sync_resources(modules=["PktgenTx"])
@@ -329,7 +330,7 @@ class TestLib:
                                           "pktgen_option": pktgen_option,
                                           "thread_option": thread_option})
 
-        m1.run(pktgen_mod, desc=desc, netns=if1.get_netns())
+        return m1.run(pktgen_mod, desc=desc, netns=if1.get_netns(), bg=bg)
 
     def custom(self, m1, desc, err_msg=None):
         m1.sync_resources(modules=["Custom"])

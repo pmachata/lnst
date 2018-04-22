@@ -34,6 +34,9 @@ class IcmpPing(TestGeneric):
         ttl = self.get_opt("ttl")
         if ttl:
             cmd += " -t %s" % ttl
+        tos = self.get_opt("tos")
+        if tos:
+            cmd += " -Q %s" % tos
         return cmd
 
     def run(self):
