@@ -835,20 +835,21 @@ class Interface(object):
                                   priomap, change)
 
     def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
-                      change = False, burst = None):
+                      change = False, burst = None, parent = None):
         self._machine._rpc_call_x(self._netns, "set_qdisc_red", self._id, limit,
-                                  avpkt, _min, _max, prob, ecn, change, burst)
+                                  avpkt, _min, _max, prob, ecn, change, burst,
+                                  parent)
 
-    def unset_qdisc(self):
-        self._machine._rpc_call_x(self._netns, "unset_qdisc", self._id)
+    def unset_qdisc(self, parent = None):
+        self._machine._rpc_call_x(self._netns, "unset_qdisc", self._id, parent)
 
-    def qdisc_red_stats(self):
+    def qdisc_red_stats(self, parent = None):
         return self._machine._rpc_call_x(self._netns, "qdisc_red_stats",
-                                         self._id)
+                                         self._id, parent)
 
-    def collect_qdisc_red_stats(self):
+    def collect_qdisc_red_stats(self, parent = None):
         self._machine._rpc_call_x(self._netns, "collect_qdisc_red_stats",
-                                  self._id)
+                                  self._id, parent)
 
     def stop_collecting_qdisc_red_stats(self):
         return self._machine._rpc_call_x(self._netns,

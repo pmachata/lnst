@@ -214,35 +214,36 @@ class SlaveMethods:
         return True
 
     def set_qdisc_red(self, if_id, limit, avpkt, _min, _max, prob = 0,
-                      ecn = False, change = False, burst = None):
+                      ecn = False, change = False, burst = None, parent = None):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:
             logging.error("Device with id '%s' not found." % if_id)
             return False
-        dev.set_qdisc_red(limit, avpkt, _min, _max, prob, ecn, change, burst)
+        dev.set_qdisc_red(limit, avpkt, _min, _max, prob, ecn, change, burst,
+                         parent)
         return True
 
-    def unset_qdisc(self, if_id):
+    def unset_qdisc(self, if_id, parent = None):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:
             logging.error("Device with id '%s' not found." % if_id)
             return False
-        dev.unset_qdisc()
+        dev.unset_qdisc(parent)
         return True
 
-    def qdisc_red_stats(self, if_id):
+    def qdisc_red_stats(self, if_id, parent = None):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:
             logging.error("Device with id '%s' not found." % if_id)
             return {}
-        return dev.qdisc_red_stats()
+        return dev.qdisc_red_stats(parent)
 
-    def collect_qdisc_red_stats(self, if_id):
+    def collect_qdisc_red_stats(self, if_id, parent = None):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is None:
             logging.error("Device with id '%s' not found." % if_id)
             return False
-        dev.collect_qdisc_red_stats()
+        dev.collect_qdisc_red_stats(parent)
         return True
 
     def stop_collecting_qdisc_red_stats(self, if_id):

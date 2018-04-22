@@ -774,10 +774,15 @@ class Device(object):
         exec_cmd(cmd)
 
     def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
-                      change = False, burst = None):
+                      change = False, burst = None, parent = None):
         cmd = "change" if change else "add"
-        cmd = "tc qdisc %s dev %s root red limit %d avpkt %d min %d max %d" % \
-              (cmd, self._name, limit, avpkt, _min, _max)
+        if parent:
+            parent = "parent 3:%d" % parent
+        else:
+            parent = "root"
+
+        cmd = "tc qdisc %s dev %s %s red limit %d avpkt %d min %d max %d" % \
+              (cmd, self._name, parent, limit, avpkt, _min, _max)
         if prob:
             cmd += " prob %d" % prob
         if ecn:
@@ -786,22 +791,31 @@ class Device(object):
             cmd += " burst %d" % burst
         exec_cmd(cmd)
 
-    def unset_qdisc(self):
-        exec_cmd("tc qdisc del dev %s root" % (self._name))
+    def unset_qdisc(self, parent = None):
+        if parent:
+            parent = "parent 3:%d" % parent
+        else:
+            parent = "root"
+        exec_cmd("tc qdisc del dev %s %s" % (self._name, parent))
 
-    def qdisc_red_stats(self):
+    def qdisc_red_stats(self, parent = None):
         try:
             out, _ = exec_cmd("tc -s qdisc show dev %s" % self._name)
         except ExecCmdFail:
             return {}
 
-        p = r"[.\n]*?qdisc red .+?(offloaded)? limit.*?\n\s*Sent " \
+        if parent:
+            parent = "parent 3:%d" % parent
+        else:
+            parent = "root"
+
+        p = r"[.\n]*?qdisc red.+?%s.+?(offloaded)? limit.*?\n\s*Sent " \
             r"(?P<tx_bytes>\d+) bytes (?P<tx_packets>\d+) pkt \(dropped " \
             r"(?P<drops>\d+), overlimits (?P<overlimits>\d+).*\n\s*backlog " \
             r"(?P<backlog>\d+\w?)b.*\n.*?marked (?P<marked>\d+) early " \
-            r"(?P<early>\d+) pdrop (?P<pdrop>\d+)"
+            r"(?P<early>\d+) pdrop (?P<pdrop>\d+)" % parent
         red_pattern = re.compile(p, re.MULTILINE)
-        stats_raw = red_pattern.match(out)
+        stats_raw = red_pattern.search(out)
         if not stats_raw:
             return {}
 
@@ -814,17 +828,18 @@ class Device(object):
         return stats
 
     class QdiscRedStatCollector:
-        def __init__(self, get_stats_func):
+        def __init__(self, get_stats_func, parent):
             self._get_stats_func = get_stats_func
             self._stop_flag = Value("b", True)
             self._stats = Manager().dict()
             self._p = None
             self._old_stats = {}
             self._backlogs = None
+            self._parent = parent
 
         def _collect_qdisc_red_stats(self, stop_flag, stats, backlogs):
             while not stop_flag.value:
-                new_stats = self._get_stats_func()
+                new_stats = self._get_stats_func(self._parent)
                 if new_stats == {}:
                     continue
                 if new_stats["tx_packets"] > stats["tx_packets"]:
@@ -838,7 +853,7 @@ class Device(object):
 
             self._stats.clear()
             self._backlogs = Manager().list()
-            self._old_stats = self._get_stats_func()
+            self._old_stats = self._get_stats_func(self._parent)
             self._stats.update(self._old_stats)
             self._stop_flag.value = False
             self._p = Process(target=self._collect_qdisc_red_stats,
@@ -860,9 +875,10 @@ class Device(object):
                     stats[key] -= self._old_stats[key]
             return (backlogs, stats)
 
-    def collect_qdisc_red_stats(self):
+    def collect_qdisc_red_stats(self, parent = None):
         assert self._red_stats_collector is None
-        self._red_stats_collector = self.QdiscRedStatCollector(self.qdisc_red_stats)
+        self._red_stats_collector = self.QdiscRedStatCollector(self.qdisc_red_stats,
+                                                               parent)
         self._red_stats_collector.start()
 
     def stop_collecting_qdisc_red_stats(self):

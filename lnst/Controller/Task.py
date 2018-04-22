@@ -711,18 +711,18 @@ class InterfaceAPI(object):
         self._if.set_qdisc_prio(bands, priomap, change)
 
     def set_qdisc_red(self, limit, avpkt, _min, _max, prob = 0, ecn = False,
-                      change = False, burst = None):
+                      change = False, burst = None, parent = None):
         self._if.set_qdisc_red(limit, avpkt, _min, _max, prob, ecn, change,
-                               burst)
+                               burst, parent)
 
-    def unset_qdisc(self):
-        self._if.unset_qdisc()
+    def unset_qdisc(self, parent = None):
+        self._if.unset_qdisc(parent)
 
-    def qdisc_red_stats(self):
-        return self._if.qdisc_red_stats()
+    def qdisc_red_stats(self, parent = None):
+        return self._if.qdisc_red_stats(parent)
 
-    def collect_qdisc_red_stats(self):
-        return self._if.collect_qdisc_red_stats()
+    def collect_qdisc_red_stats(self, parent = None):
+        return self._if.collect_qdisc_red_stats(parent)
 
     def stop_collecting_qdisc_red_stats(self):
         return self._if.stop_collecting_qdisc_red_stats()
