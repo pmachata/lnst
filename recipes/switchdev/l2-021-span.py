@@ -117,6 +117,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             assert_procs += run_packet_assert(out_num, m2_if2, m1_if1, m2_if1,
                                               aliases["ipv"])
             tl.ping_simple(m1_if1, m2_if1, count=10)
+            sleep(1)
             for assert_proc in assert_procs:
                 assert_proc.intr()
 
