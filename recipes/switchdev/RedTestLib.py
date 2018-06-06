@@ -310,7 +310,9 @@ class RedTestLib:
             msg = "Not enough early drops (%d)" % res.stats["early"]
         self.test_result(desc, msg)
 
-        if max(res.backlogs) > self.max * 1.2:
+        if not res.backlogs.size:
+            self.test_result("RED high rate no backlog results")
+        else if max(res.backlogs) > self.max * 1.2:
             self.test_result("RED high rate - backlog over limit",
                              "backlog was %d when max limit is %d" %
                              (max(res.backlogs), self.max))
