@@ -254,9 +254,13 @@ class TestLib:
         sender_stats_after = sender.link_stats()
         recivers_stats_after = map(lambda i:i.link_stats(), recivers)
 
+        def wrap_sub(after, before, lim=1<<64):
+            return (after - before) % lim
+
         # Check that who got multi cast traffic
-        tx = sender_stats_after["tx_bytes"] - sender_stats_before["tx_bytes"]
-        rx = map(lambda i,l:i["rx_bytes"] - l["rx_bytes"],
+        tx = wrap_sub(sender_stats_after["tx_bytes"],
+                      sender_stats_before["tx_bytes"])
+        rx = map(lambda i,l:wrap_sub(i["rx_bytes"], l["rx_bytes"]),
                  recivers_stats_after, recivers_stats_before)
         recivers_result = [rate > self._mc_high_thershold for rate in rx]
         for i in zip(rx, recivers):
