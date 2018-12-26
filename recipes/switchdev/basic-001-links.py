@@ -21,10 +21,7 @@ def linkneg(tl, if1, if2):
     if 'mlx5' in if1_drv or 'mlx5' in if2_drv:
         return
 
-    if 'mlx4' in if1_drv or 'mlx4' in if2_drv:
-        speeds = [10000, 40000]
-    else:
-        speeds = [10000, 40000, 100000]
+    speeds = [10000, 25000]
 
     for speed in speeds:
         tl.linkneg(if1, if2, True, speed=speed, timeout=30)
