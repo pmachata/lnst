@@ -13,9 +13,6 @@ from TestLib import TestLib
 from time import sleep
 import random
 
-CELL_SIZE = 288 # Least common multiple of cell sizes of Spectrum and
-                # Spectrum-2, which are, respectively, 96 and 144.
-
 class RandomValuePicker:
     def __init__(self, pools):
         self._pools = {"ingress": [], "egress": []}
@@ -30,11 +27,9 @@ class RandomValuePicker:
         # support static threshold only for now
         return "static"
 
-    def _get_th(self, pool):
-        th = random.randint(3,16)
-        if pool == 8: # Pool 8 has static quotas.
-            th *= CELL_SIZE
-        return th
+    def _get_th(self):
+        # support dynamic threshold only for now
+        return random.randint(3,16)
 
     def _get_pool(self, direction):
         arr = self._pools[direction]
@@ -45,15 +40,12 @@ class RandomValuePicker:
             return (self._get_size(), self._get_thtype())
         if isinstance(objid, TcBind):
             pool = self._get_pool(objid["type"])
-            th = self._get_th(pool)
+            th = self._get_th()
             return (pool, th)
         if isinstance(objid, PortPool):
-            return (self._get_th(objid["pool"]),)
+            return (self._get_th(),)
 
 class RecordValuePickerException(Exception):
-    pass
-
-class SkipTest(Exception):
     pass
 
 class RecordValuePicker:
@@ -63,9 +55,6 @@ class RecordValuePicker:
             self._recs.append({"objid": item, "value": item.var_tuple()})
 
     def get_value(self, objid):
-        if isinstance(objid, Pool) and objid["pool"] == 8:
-	    # Pool 8 is reported with infinite size, which can't be reset.
-	    raise SkipTest()
         for rec in self._recs:
             if rec["objid"].weak_eq(objid):
                 return rec["value"]
@@ -135,10 +124,7 @@ def get_pools(sw, dlname, direction=None):
 def do_check_pools(tl, sw, dlname, pools, vp):
     for pool in pools:
         pre_pools = get_pools(sw, dlname)
-        try:
-            (size, thtype) = vp.get_value(pool)
-        except SkipTest:
-            continue
+        (size, thtype) = vp.get_value(pool)
         pool.dl_set(sw, dlname, size, thtype)
         post_pools = get_pools(sw, dlname)
         pool = post_pools.get_by(pool)
