@@ -17,7 +17,7 @@ class RandomValuePicker:
     def __init__(self, pools):
         self._pools = {"ingress": [], "egress": []}
         for pool in pools:
-            self._pools[pool["type"]].append(pool["pool"])
+            self._pools[pool["type"]].append(pool)
 
     def _get_size(self):
         # support only this fixed size for now
@@ -41,7 +41,8 @@ class RandomValuePicker:
         if isinstance(objid, TcBind):
             pool = self._get_pool(objid["type"])
             th = self._get_th()
-            return (pool, th)
+            pool_n = pool["pool"]
+            return (pool_n, th)
         if isinstance(objid, PortPool):
             return (self._get_th(),)
 
