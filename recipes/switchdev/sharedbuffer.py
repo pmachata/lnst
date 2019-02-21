@@ -28,8 +28,7 @@ class RandomValuePicker:
         return th * 8000 * self._cell_size()
 
     def _get_size(self):
-        # support only this fixed size for now
-        return 12401088
+        return self._get_static_size(16)
 
     def _get_thtype(self):
         # support static threshold only for now
