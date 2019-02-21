@@ -64,6 +64,9 @@ class RandomValuePicker:
 class RecordValuePickerException(Exception):
     pass
 
+class SkipTest(Exception):
+    pass
+
 class RecordValuePicker:
     def __init__(self, objlist):
         self._recs = []
@@ -71,6 +74,9 @@ class RecordValuePicker:
             self._recs.append({"objid": item, "value": item.var_tuple()})
 
     def get_value(self, objid):
+        if isinstance(objid, Pool) and objid["pool"] == 8:
+	    # Pool 8 is reported with infinite size, which can't be reset.
+	    raise SkipTest()
         for rec in self._recs:
             if rec["objid"].weak_eq(objid):
                 return rec["value"]
@@ -140,7 +146,10 @@ def get_pools(sw, dlname, direction=None):
 def do_check_pools(tl, sw, dlname, pools, vp):
     for pool in pools:
         pre_pools = get_pools(sw, dlname)
-        (size, thtype) = vp.get_value(pool)
+        try:
+            (size, thtype) = vp.get_value(pool)
+        except SkipTest:
+            continue
         pool.dl_set(sw, dlname, size, thtype)
         post_pools = get_pools(sw, dlname)
         pool = post_pools.get_by(pool)
