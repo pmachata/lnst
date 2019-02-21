@@ -19,6 +19,14 @@ class RandomValuePicker:
         for pool in pools:
             self._pools[pool["type"]].append(pool)
 
+    def _cell_size(self):
+	return self._pools["ingress"][0]["cell_size"]
+
+    def _get_static_size(self, th):
+        # For threshold of 16, this works out to be about 12MB on Spectrum-1,
+        # and about 17MB on Spectrum-2.
+        return th * 8000 * self._cell_size()
+
     def _get_size(self):
         # support only this fixed size for now
         return 12401088
@@ -27,9 +35,12 @@ class RandomValuePicker:
         # support static threshold only for now
         return "static"
 
-    def _get_th(self):
-        # support dynamic threshold only for now
-        return random.randint(3,16)
+    def _get_th(self, pool):
+        th = random.randint(3,16)
+        if pool["thtype"] == "dynamic":
+            return th
+	else:
+	    return self._get_static_size(th)
 
     def _get_pool(self, direction):
         arr = self._pools[direction]
@@ -40,11 +51,16 @@ class RandomValuePicker:
             return (self._get_size(), self._get_thtype())
         if isinstance(objid, TcBind):
             pool = self._get_pool(objid["type"])
-            th = self._get_th()
+            th = self._get_th(pool)
             pool_n = pool["pool"]
             return (pool_n, th)
         if isinstance(objid, PortPool):
-            return (self._get_th(),)
+            pool_n = objid["pool"]
+            pool = (self._pools["ingress"] +
+                    self._pools["egress"])[pool_n]
+            assert pool["pool"] == pool_n
+            th = self._get_th(pool)
+            return (th,)
 
 class RecordValuePickerException(Exception):
     pass
