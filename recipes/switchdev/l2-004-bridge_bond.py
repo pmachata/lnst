@@ -29,9 +29,8 @@ def do_task(ctl, hosts, ifaces, aliases):
                                                          "multicast_snooping": 0})
     test_ifaces = m1_lag1, m2_lag1, sw_lag1, sw_lag2
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases, test_ifaces)
+    tl.wait_for_if(ifaces)
     tl.link_status_show()
     tl.ping_simple(m1_lag1, m2_lag1)
     tl.netperf_tcp(m1_lag1, m2_lag1)

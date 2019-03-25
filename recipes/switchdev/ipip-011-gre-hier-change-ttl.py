@@ -80,7 +80,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             logging.info("--- TTL inherit")
 
-            sleep(30)
+            tl.wait_for_if([m1_if1, m2_if1, sw_if1, sw_if2])
             ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,
                       count=25, ttl=3, fail_expected=True)
 

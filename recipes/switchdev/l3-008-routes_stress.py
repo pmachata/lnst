@@ -90,8 +90,8 @@ def do_task(ctl, hosts, ifaces, aliases):
         sw_if1.add_nhs_route(ipv4(test_ip(route_major, route_minor, [])),
                              [ipv4(test_ip(2, 3, []))])
 
-    sleep(30)
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
 
     # check that there are ROUTES_COUNT offloaded routes
     dc_routes, nh_routes = sw.get_routes()

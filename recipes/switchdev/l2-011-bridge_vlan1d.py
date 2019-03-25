@@ -42,9 +42,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw.create_bridge(slaves=[sw_if1_20, sw_if2_21],
                      options={"multicast_snooping": 0})
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
 
     tl.ping_simple(m1_if1, m2_if1)
     tl.netperf_tcp(m1_if1, m2_if1)

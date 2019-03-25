@@ -730,6 +730,9 @@ class InterfaceAPI(object):
     def set_link_up(self):
         return self._if.set_link_up()
 
+    def is_up(self, timeout):
+        self._if.is_up(timeout)
+
     def set_link_down(self):
         return self._if.set_link_down()
 

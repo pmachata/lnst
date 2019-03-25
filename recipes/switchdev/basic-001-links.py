@@ -36,10 +36,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     m1_if1.reset(ip=["192.168.101.10/24", "2002::1/64"])
     sw_if1.reset(ip=["192.168.101.11/24", "2002::2/64"])
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
-
+    tl.wait_for_if(ifaces)
     linkneg(tl, sw_if1, m1_if1)
 
 do_task(ctl, [ctl.get_host("machine1"),

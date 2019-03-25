@@ -92,8 +92,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     m2_if1.add_nhs_route(ipv6(test_ip(2, 0)), [str(sw_br_v10.get_ip(1))], ipv6=True)
     m3_if1.add_nhs_route(ipv6(test_ip(1, 0)), [str(sw_if2.get_ip(1))], ipv6=True)
 
-    sleep(30)
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m2_if1_v10, m1_if1_v10)
     tl.ping_simple(m2_if1_v10, sw_br_v10)
     tl.ping_simple(m1_if1_v10, m3_if1)

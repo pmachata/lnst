@@ -40,9 +40,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     m1_if1.add_nhs_route(ipv6(test_ip(2,0)), [ipv6(test_ip(1,2,[]))], ipv6=True);
     m2_if1.add_nhs_route(ipv6(test_ip(1,0)), [ipv6(test_ip(2,2,[]))], ipv6=True);
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_if1, m2_if1)
 
     # Remove route and check that traffic is not passing

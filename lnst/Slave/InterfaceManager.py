@@ -15,7 +15,7 @@ olichtne@redhat.com (Ondrej Lichtner)
 import re
 import select
 import logging
-from time import sleep
+from time import time, sleep
 from lnst.Slave.NetConfigDevice import NetConfigDevice
 from lnst.Slave.NetConfigCommon import get_option
 from lnst.Common.NetUtils import normalize_hwaddr
@@ -661,6 +661,18 @@ class Device(object):
             self._conf.up()
         else:
             exec_cmd("ip link set %s up" % self._name)
+
+    def is_up(self, max_time):
+        start_time = time()
+        while(time() - start_time < max_time):
+            out, _ = exec_cmd("ip l show dev %s up | grep 'state UP'" % self._name, die_on_err = False)
+            if out == "":
+                logging.info("sleep 20!")
+                sleep(20)
+            else:
+                logging.info("port up!")
+                return True
+        raise IfMgrError("Time out - device %s not up." % self._name)
 
     def down(self):
         if self._conf != None:

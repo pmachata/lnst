@@ -105,7 +105,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     # are going to use random UDP source and destination ports.
     sw.run("sysctl -w net.ipv4.fib_multipath_hash_policy=1")
 
-    sleep(30)
+    tl.wait_for_if(ifaces)
 
     # Basic sanity check to make sure test is not failing due to
     # setup issues.

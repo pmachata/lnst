@@ -37,9 +37,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.add_br_vlan(20)
     sw_if2.add_br_vlan(20)
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
 
     tl.ping_simple(m1_if1, m2_if1)
     tl.netperf_tcp(m1_if1, m2_if1)

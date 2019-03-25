@@ -937,7 +937,8 @@ class Interface(object):
 
     def up(self):
         self._machine._rpc_call_x(self._netns, "set_device_up", self._id)
-
+    def is_up(self, max_time):
+        self._machine._rpc_call_x(self._netns, "is_up", (self._id, max_time))
     def down(self):
         self._machine._rpc_call_x(self._netns, "set_device_down", self._id)
 

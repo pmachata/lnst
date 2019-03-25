@@ -45,7 +45,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                       remote_ip="1.2.3.5") as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(30)
+                tl.wait_for_if(ifaces)
                 ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,
                           require_fastpath=False)
 

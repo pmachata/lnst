@@ -55,9 +55,8 @@ def do_task(ctl, hosts, ifaces, bridges, aliases):
     m3_if.set_addresses(test_ip(1,3))
     m4_if.set_addresses(test_ip(1,4))
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.check_cpu_traffic(sw_ports, test=False)
     for iface in [m1_if, m2_if, m3_if, m4_if]:
         iface.enable_multicast()

@@ -20,10 +20,8 @@ def do_task(ctl, hosts, ifaces, aliases):
                                                "2002::1/64"])
     sw_if1_10 = sw.create_vlan(sw_if1, 10, ip=["192.168.101.11/24",
                                                "2002::2/64"])
-
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_if1_10, sw_if1_10)
     tl.netperf_tcp(m1_if1_10, sw_if1_10)
     tl.netperf_udp(m1_if1_10, sw_if1_10)

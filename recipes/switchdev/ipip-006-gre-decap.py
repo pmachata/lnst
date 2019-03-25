@@ -49,7 +49,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
         with dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d:
             add_forward_route(sw, vrf_None, "1.2.3.5")
-            sleep(30)
+            tl.wait_for_if(ifaces)
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)
@@ -102,7 +102,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                  remote_ip="1.2.3.5") as g:
 
             logging.info("--- hierarchical configuration")
-            sleep(30)
+            tl.wait_for_if(ifaces)
 
             ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
                       ipv6=True)

@@ -39,9 +39,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.add_br_vlan(20)
     sw_if2.add_br_vlan(20)
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
 
     tl.ping_simple(m1_if1, m2_if1)
     tl.ping_simple(m1_if1_10, m2_if1_10)
@@ -75,7 +74,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_br.slave_del(sw_if1.get_id())
     sw_if1.reset(ip=test_ip(1, 3))
 
-    sleep(30)
+    tl.wait_for_if(ifaces)
 
     tl.ping_simple(sw_if1, m1_if1)
 

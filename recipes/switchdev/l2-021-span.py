@@ -102,7 +102,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw.create_bridge(slaves=[sw_if1, sw_if2], options={"vlan_filtering": 1,
                                                        "multicast_snooping": 0})
     with MirredPort(sw_if2) as mirred_port:
-        sleep(30)
+        tl.wait_for_if(ifaces)
 
         mirror_status = {"ingress": False, "egress": False }
         for i in range(10):
@@ -122,7 +122,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                 assert_proc.intr()
 
     with MirredPort(sw_if2) as mirred_port:
-        sleep(30)
+        tl.wait_for_if(ifaces)
 
         # Create a conflicting mirror. mlxsw can't offload this and should
         # reject. Note that the combination of ingress and egress (which is

@@ -55,9 +55,9 @@ def do_task(ctl, hosts, ifaces, bridges, aliases):
     m4_if.set_addresses(test_ip(1,4))
     for iface in [m1_if, m2_if, m3_if, m4_if]:
         iface.enable_multicast()
-    sleep(30)
 
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.check_cpu_traffic(sw_ports, test=False)
 
     used_mdb = max(8, sw_br.show_br_mdb().count("offload") + 2)

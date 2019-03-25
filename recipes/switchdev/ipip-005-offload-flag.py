@@ -31,7 +31,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                  remote_ip="1.2.3.5") as g, \
              encap_route(sw, vrf_None, 2, g, ip=ipv4), \
              encap_route(sw, vrf_None, 2, g, ip=ipv6):
-            sleep(30)
+            tl.wait_for_if(ifaces)
 
             ulip = onet2_ip(ctl, 0, [24, 64])
             (r4,), _ = sw.get_routes("table 0 %s" % ipv4(ulip))

@@ -45,9 +45,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_lag2 = sw.create_team(slaves=[sw_if3, sw_if4], config=team_config,
                              ip=test_ip(2,2))
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_lag1, m2_lag1)
     tl.netperf_tcp(m1_lag1, m2_lag1)
     tl.netperf_udp(m1_lag1, m2_lag1)

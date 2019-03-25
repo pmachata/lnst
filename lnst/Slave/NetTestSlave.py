@@ -305,6 +305,15 @@ class SlaveMethods:
         dev.up()
         return True
 
+    def is_up(self, argv):
+        if_id = argv[0]
+        max_time = argv[1]
+
+        dev = self._if_manager.get_mapped_device(if_id)
+        if not dev.is_up(max_time):
+            return False
+        return True
+
     def set_device_down(self, if_id):
         dev = self._if_manager.get_mapped_device(if_id)
         if dev is not None:

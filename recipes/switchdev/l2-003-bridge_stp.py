@@ -32,10 +32,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     # Make sure FDB is not populated by control packets.
     sw_if1.set_br_learning(on=False, master=True)
 
-    sleep(40)
-
     tl = TestLib(ctl, aliases)
-
+    tl.wait_for_if(ifaces)
     # Set STP state to DISABLED and make sure ping fails and FDB is not
     # populated.
     sw_if1.set_br_state(0)

@@ -19,9 +19,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     m1_if1.reset(ip=["192.168.101.10/24", "2002::1/64"])
     sw_if1.reset(ip=["192.168.101.11/24", "2002::2/64"])
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     for x in range(64, 1500):
         tl.pktgen(sw_if1, m1_if1, x)
     for x in range(64, 1500):

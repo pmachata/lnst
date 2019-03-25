@@ -10,7 +10,7 @@ idosch@mellanox.com (Ido Schimmel)
 petrm@mellanox.com (Petr Machata)
 """
 
-from time import sleep
+from time import sleep, time
 import logging
 import re
 
@@ -534,6 +534,11 @@ class TestLib:
                         "Got notification with wrong source VIF: %d != %d" % \
                             (source_vif, notif["source_vif"]))
         return notif
+
+    def wait_for_if(self, interfaces, timeout = 120):
+        for interfaceApi in interfaces:
+            interfaceApi.is_up(timeout)
+        sleep(5)
 
 class Qdisc:
     def __init__(self, iface, handle, qdisc):

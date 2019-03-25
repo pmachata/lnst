@@ -23,9 +23,9 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     # We need to get a netlink message with the VLAN devices' info,
     # so make sure we wait long enough.
-    sleep(30)
 
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     for x in range(64, 1500):
         tl.pktgen(sw_if1_20, m1_if1_20, x)
     for x in range(64, 1500):

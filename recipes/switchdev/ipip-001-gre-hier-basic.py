@@ -50,7 +50,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
                 sleep(5)
                 d.set_addresses(["1.2.3.4/32"])
-                sleep(30)
+                tl.wait_for_if(ifaces)
                 ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                           ipv6=True)
                 ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)
@@ -89,7 +89,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                      remote_ip="1.2.3.5") as g2:
 
                 def quick_test(ipv4_fail, ipv6_fail):
-                    sleep(5)
+                    sleep(20)
                     ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1,
                               g1, count=25, fail_expected=ipv6_fail, ipv6=True)
                     ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1,
@@ -151,7 +151,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                      remote_ip="1.2.3.5") as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(30)
+                tl.wait_for_if(ifaces)
                 ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,
                           require_fastpath=False)
 
@@ -165,7 +165,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                      key=3333, csum=True) as g, \
                  encap_route(sw, vrf_o, 2, g):
 
-                sleep(30)
+                tl.wait_for_if(ifaces)
                 ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,
                           require_fastpath=False)
 

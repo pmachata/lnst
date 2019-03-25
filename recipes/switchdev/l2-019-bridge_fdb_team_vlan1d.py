@@ -39,9 +39,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     br_options = {"vlan_filtering": 0, "ageing_time": 1000, "multicast_snooping": 0}
     sw_br = sw.create_bridge(slaves = [sw_lag1_10, sw_lag2_20], options=br_options)
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_lag1_10, m2_lag1_20)
     tl.check_fdb(sw_lag1_10, m1_lag1_10.get_hwaddr(), 0, True, True)
     sw_lag1_10.set_br_learning(on=False, master=True)

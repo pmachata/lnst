@@ -53,7 +53,7 @@ def do_task(ctl, hosts, ifaces, aliases):
              encap_route(sw, vrf_None, 4, g2, ip=ipv4), \
              encap_route(sw, vrf_None, 4, g2, ip=ipv6):
 
-            sleep(30)
+            tl.wait_for_if(ifaces)
             ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                       ipv6=True, require_fastpath=False)
             ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g,

@@ -34,9 +34,9 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw.create_bridge(slaves=[sw_lag1, sw_lag2], options={"vlan_filtering": 1,
                                                          "multicast_snooping": 0})
 
-    sleep(30)
 
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if1.set_link_down()
@@ -45,19 +45,19 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.set_link_up()
     # Wait for link to come up. Otherwise we start the ping when both
     # links are down.
-    sleep(30)
+    tl.wait_for_if(ifaces)
     sw_if2.set_link_down()
     tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if2.set_link_up()
-    sleep(30)
+    tl.wait_for_if(ifaces)
     sw_if1.set_link_down()
     sw_if3.set_link_down()
     tl.ping_simple(m1_lag1, m2_lag1)
 
     sw_if1.set_link_up()
     sw_if3.set_link_up()
-    sleep(30)
+    tl.wait_for_if(ifaces)
     sw_if2.set_link_down()
     sw_if4.set_link_down()
     tl.ping_simple(m1_lag1, m2_lag1)

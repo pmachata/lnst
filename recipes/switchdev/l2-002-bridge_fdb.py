@@ -29,9 +29,9 @@ def do_task(ctl, hosts, ifaces, aliases):
                   "multicast_snooping": 0}
     sw_br = sw.create_bridge(slaves = [sw_if1, sw_if2], options=br_options)
 
-    sleep(30)
 
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_if1, m2_if1)
     tl.check_fdb(sw_if1, m1_if1.get_hwaddr(), 1, True, True)
     sw_if1.set_br_learning(on=False, master=True)

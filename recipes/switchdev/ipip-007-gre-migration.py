@@ -50,7 +50,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             sw.run("ip l set dev %s master %s" % (d.get_devname(), vrf_u))
 
-            sleep(30)
+            tl.wait_for_if(ifaces)
             ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                     ipv6=True)
             ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)
@@ -79,6 +79,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             with encap_route(sw, vrf_None, 2, g, ip=ipv4), \
                  encap_route(sw, vrf_None, 2, g, ip=ipv6):
+                tl.wait_for_if(ifaces)
                 sleep(30)
                 ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                           ipv6=True)

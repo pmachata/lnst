@@ -35,9 +35,8 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.add_br_vlan(95)
     sw_if2.add_br_vlan(95)
 
-    sleep(30)
-
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
 
     # Test to establish that there is connectivity.
     tl.ping_simple(m1_if1_85, m2_if1_85, count=10, limit_rate=9, interval=0.1)

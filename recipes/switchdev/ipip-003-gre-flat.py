@@ -43,7 +43,7 @@ def do_task(ctl, hosts, ifaces, aliases):
         sw_if1.reset()
         sw_if2.reset()
         add_forward_route(sw, vrf1, "1.2.3.5")
-        sleep(30)
+        tl.wait_for_if(ifaces)
 
         ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                   ipv6=True)
@@ -70,7 +70,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
             sleep(5)
             d.set_addresses(["1.2.3.4/32"])
-            sleep(30)
+            tl.wait_for_if(ifaces)
             ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,
                       ipv6=True)
             ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)

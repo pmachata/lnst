@@ -25,9 +25,9 @@ def do_task(ctl, hosts, ifaces, aliases):
 
     ecmp_common.create_topology(m1_if1, sw_if1, ecmp_sw_ifaces, ecmp_m_ifaces,
                                 m2_if3, m3_if1)
-    sleep(30)
 
     tl = TestLib(ctl, aliases)
+    tl.wait_for_if(ifaces)
     tl.ping_simple(m1_if1, m3_if1)
     tl.netperf_udp(m1_if1, m3_if1)
     ecmp_common.test_traffic(tl, m1_if1, m3_if1, sw_if1, ecmp_sw_ifaces)
