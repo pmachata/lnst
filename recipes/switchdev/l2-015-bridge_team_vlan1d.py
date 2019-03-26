@@ -70,7 +70,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     sw_if1.reset(ip=test_ip(4, 1))
     m1_if1.reset(ip=test_ip(4, 2))
 
-    tl.wait_for_if(ifaces)
+    tl.wait_for_if([sw_if1, m1_if1])
 
     tl.ping_simple(sw_if1, m1_if1)
 
