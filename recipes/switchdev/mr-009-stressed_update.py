@@ -37,7 +37,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     tl = TestLib(ctl, aliases)
     mt = MrouteTest(tl, hosts, ifaces)
 
-    sleep(30)
+    tl.wait_for_if(ifaces)
     mt.init()
 
     # add vifs
