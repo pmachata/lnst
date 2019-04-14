@@ -74,8 +74,8 @@ class RecordValuePicker:
             self._recs.append({"objid": item, "value": item.var_tuple()})
 
     def get_value(self, objid):
-        if isinstance(objid, Pool) and objid["pool"] == 8:
-	    # Pool 8 is reported with infinite size, which can't be reset.
+        if isinstance(objid, Pool) and objid["pool"] in [4, 8, 9, 10]:
+            # The threshold type of pools 4, 8, 9 and 10 cannot be changed
 	    raise SkipTest()
         for rec in self._recs:
             if rec["objid"].weak_eq(objid):
