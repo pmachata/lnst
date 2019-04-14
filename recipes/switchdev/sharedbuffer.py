@@ -77,6 +77,9 @@ class RecordValuePicker:
         if isinstance(objid, Pool) and objid["pool"] in [4, 8, 9, 10]:
             # The threshold type of pools 4, 8, 9 and 10 cannot be changed
 	    raise SkipTest()
+        if isinstance(objid, TcBind) and objid["tc"] >= 8:
+            # Multicast TCs cannot be changed
+	    raise SkipTest()
         for rec in self._recs:
             if rec["objid"].weak_eq(objid):
                 return rec["value"]
@@ -206,7 +209,10 @@ def get_tcbinds(tl, sw, ports, verify_existence=False):
 def do_check_tcbind(tl, sw, ports, tcbinds, vp):
     for tcbind in tcbinds:
         pre_tcbinds = get_tcbinds(tl, sw, ports)
-        (pool, th) = vp.get_value(tcbind)
+        try:
+            (pool, th) = vp.get_value(tcbind)
+        except SkipTest:
+            continue
         tcbind.dl_set(sw, pool, th)
         post_tcbinds = get_tcbinds(tl, sw, ports)
         tcbind = post_tcbinds.get_by(tcbind)
