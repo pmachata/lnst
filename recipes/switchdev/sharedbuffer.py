@@ -13,14 +13,18 @@ from TestLib import TestLib
 from time import sleep
 import random
 
+class SkipTest(Exception):
+    pass
+
 class RandomValuePicker:
     def __init__(self, pools):
         self._pools = {"ingress": [], "egress": []}
+        self._pools = []
         for pool in pools:
-            self._pools[pool["type"]].append(pool)
+            self._pools.append(pool)
 
     def _cell_size(self):
-	return self._pools["ingress"][0]["cell_size"]
+	return self._pools[0]["cell_size"]
 
     def _get_static_size(self, th):
         # For threshold of 16, this works out to be about 12MB on Spectrum-1,
@@ -42,29 +46,43 @@ class RandomValuePicker:
 	    return self._get_static_size(th)
 
     def _get_pool(self, direction):
-        arr = self._pools[direction]
+        ing_pools = []
+        egr_pools = []
+        for pool in self._pools:
+            if pool["type"] == "ingress":
+                ing_pools.append(pool)
+            else:
+                egr_pools.append(pool)
+        if direction == "ingress":
+            arr = ing_pools
+        else:
+            arr = egr_pools
         return arr[random.randint(0, len(arr) - 1)]
 
     def get_value(self, objid):
         if isinstance(objid, Pool):
-            return (self._get_size(), self._get_thtype())
+            if objid["pool"] in [4, 8, 9, 10]:
+                # The threshold type of pools 4, 8, 9 and 10 cannot be changed
+	        raise SkipTest()
+            else:
+                return (self._get_size(), self._get_thtype())
         if isinstance(objid, TcBind):
-            pool = self._get_pool(objid["type"])
-            th = self._get_th(pool)
-            pool_n = pool["pool"]
-            return (pool_n, th)
+            if objid["tc"] >= 8:
+                # Multicast TCs cannot be changed
+	        raise SkipTest()
+            else:
+                pool = self._get_pool(objid["type"])
+                th = self._get_th(pool)
+                pool_n = pool["pool"]
+                return (pool_n, th)
         if isinstance(objid, PortPool):
             pool_n = objid["pool"]
-            pool = (self._pools["ingress"] +
-                    self._pools["egress"])[pool_n]
+            pool = self._pools[pool_n]
             assert pool["pool"] == pool_n
             th = self._get_th(pool)
             return (th,)
 
 class RecordValuePickerException(Exception):
-    pass
-
-class SkipTest(Exception):
     pass
 
 class RecordValuePicker:
