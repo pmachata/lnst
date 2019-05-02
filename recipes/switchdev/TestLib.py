@@ -535,7 +535,7 @@ class TestLib:
                             (source_vif, notif["source_vif"]))
         return notif
 
-    def wait_for_if(self, interfaces, timeout = 600):
+    def wait_for_if(self, interfaces, timeout = 300):
         for interfaceApi in interfaces:
             interfaceApi.is_up(timeout)
         sleep(5)

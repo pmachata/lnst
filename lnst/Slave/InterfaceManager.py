@@ -701,6 +701,9 @@ class Device(object):
                  "hwaddr": self._hwaddr}
         try:
             out, _ = exec_cmd("ip -s link show %s" % self._name)
+            cmd = "ethtool -S %s | egrep " % self._name
+            cmd = cmd + '"error|discard"'
+            exec_cmd(cmd)
         except:
             return {}
 
@@ -908,6 +911,9 @@ class Device(object):
 
     def add_route(self, dest, ipv6):
         exec_cmd("ip %s route add %s dev %s" % ("-6" if ipv6 else "", dest, self._name))
+        #cmd = "ethtool -S %s | egrep " % self._name
+        #cmd = cmd + '"error|discard"'
+        #exec_cmd(cmd, report_stderr=True)
 
     def del_route(self, dest, ipv6):
         exec_cmd("ip %s route del %s dev %s" % ("-6" if ipv6 else "", dest, self._name), die_on_err=False)
