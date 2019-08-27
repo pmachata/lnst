@@ -1,0 +1,50 @@
+<network>
+        <host id="machine1">
+            <interfaces>
+                <eth id="if1" label="A">
+                    <addresses>
+                        <address value="192.0.2.1/28"/>
+                        <address value="2001:db8:1::1/64"/>
+                    </addresses>
+                </eth>
+            </interfaces>
+        </host>
+        <host id="machine2">
+            <interfaces>
+                <eth id="if1" label="B">
+                    <addresses>
+                        <address value="192.0.2.18/28"/>
+                        <address value="2001:db8:2::2/64"/>
+                    </addresses>
+                </eth>
+                <eth id="if2" label="C">
+                    <addresses>
+                        <address value="192.0.2.34/28"/>
+                        <address value="2001:db8:3::2/64"/>
+                    </addresses>
+                </eth>
+            </interfaces>
+        </host>
+        <host id="switch">
+            <interfaces>
+                <eth id="if1" label="A">
+                    <addresses>
+                        <address value="192.0.2.2/28"/>
+                        <address value="2001:db8:1::2/64"/>
+                    </addresses>
+                </eth>
+                <eth id="if2" label="B">
+                    <addresses>
+                        <address value="192.0.2.17/28"/>
+                        <address value="2001:db8:2::1/64"/>
+                    </addresses>
+                </eth>
+                <eth id="if3" label="C">
+                    <addresses>
+                        <address value="192.0.2.33/28"/>
+                        <address value="2001:db8:3::1/64"/>
+                    </addresses>
+                </eth>
+            </interfaces>
+        </host>
+</network>
