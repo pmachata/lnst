@@ -1,0 +1,5 @@
+<lnstrecipe xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="default_aliases.xml" />
+    <xi:include href="ptp_common_topology.xml" />
+    <task python="ptp-002-vlan_slave_and_master.py" />
+</lnstrecipe>
