@@ -321,7 +321,7 @@ def get_ports(sw, dlname):
     d = run_json_cmd(sw, "devlink port show -j")
     ports = PortList()
     for name in d["port"]:
-        if name.find(dlname) == 0:
+        if name.find(dlname) == 0 and d["port"][name]["flavour"] == "physical":
             ports.append(Port(name))
     return ports
 
