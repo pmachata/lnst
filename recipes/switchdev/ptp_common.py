@@ -41,6 +41,31 @@ class Machine(object):
         if option is not None:
             sec[option] = value
 
+    def sysctl_set(self):
+        self.sysctl_orig = {}
+        output = self.machine.run("sysctl -ar '\\brp_filter'")
+        for line in output.out().split('\n'):
+            fields = line.split(" = ")
+            if len(fields) > 1:
+                key, value = fields
+                self.sysctl_orig[key] = value
+                self.machine.run("sysctl -w %s=0" % key)
+
+    def sysctl_restore(self):
+            for key, value in self.sysctl_orig.items():
+                self.machine.run("sysctl -w %s=%s" % (key, value))
+
+    def is_supported_speed(self, speed):
+        for iface in self.ifaces:
+            output = self.machine.run("ethtool %s" % iface.get_devname())
+            supported_speeds = output.out()[output.out().find("Supported link modes"):]
+            supported_speeds = supported_speeds[:supported_speeds.find("Advertised link modes")]
+            speed += 'base'
+            if speed not in supported_speeds:
+                return False
+        return True
+
+
     def configure(self, transport):
         self.cfg = OrderedDict()
         self.set_opt("global", "logSyncInterval", "0")
@@ -57,6 +82,15 @@ class Master(Machine):
     def configure(self, transport):
         Machine.configure(self, transport)
         Machine.set_opt(self, "global", "priority1", "126")
+
+class SLAVE2(Machine):
+    # SLAVE1 and SLAVE2 run on the same machine (m1).
+    # Do not have to handle sysctl twice.
+    def sysctl_set(self):
+        pass
+
+    def sysctl_restore(self):
+        pass
 
 class PortSpeed(object):
     def __init__(self, machines, speed):
@@ -106,7 +140,7 @@ class PtpTest(object):
                                          sw_if2, sw_if3], desired_hops=1),
                           'SLAVE1': Machine(self.m2, 'SLAVE1', [m2_if1],
                                         desired_hops=2),
-                          'SLAVE2': Machine(self.m2, 'SLAVE2', [m2_if2],
+                          'SLAVE2': SLAVE2(self.m2, 'SLAVE2', [m2_if2],
                                         desired_hops=2)
                         }
 
@@ -216,8 +250,21 @@ class PtpTest(object):
             machine_obj.get_machine().run("rm -f %s" % inifile)
             proccess.kill()
 
+    def get_speeds(self):
+        speeds = [1000, 10000]
+        for machine_obj in self.machines.values():
+            if not machine_obj.is_supported_speed('100000'):
+                return speeds
+
+        speeds.append(100000)
+        return speeds
+
     def run_tests(self):
-        for speed in 1000, 10000, 100000:
+        for machine_obj in self.machines.values():
+            machine_obj.sysctl_set()
+
+        sppeds = self.get_speeds()
+        for speed in sppeds:
             with PortSpeed(self.machines, speed):
                 self.run_test(transport="UDPv4", desc="port speed = %s"
                         % speed)
@@ -227,3 +274,6 @@ class PtpTest(object):
 
         self.run_test(transport="UDPv6", desc="IPv6")
         self.run_test(transport="L2", desc="IEEE-802.3")
+
+        for machine_obj in self.machines.values():
+            machine_obj.sysctl_restore()
