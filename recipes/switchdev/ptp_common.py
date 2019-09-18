@@ -232,12 +232,16 @@ class PtpTest(object):
                 err_msg.append("%s is %s steps removed from master, expected" \
                         " %d" % (machine_name, hops, desired_hops))
 
-    def run_test(self, transport, desc):
+    def run_test(self, transport, desc, extra_sleep=False):
         self.init_setup(transport)
         cleanup = self.run_ptp4l()
 
         logging.info("sleep %s sec" % SLEEP_TIME)
         sleep(SLEEP_TIME)
+
+        if extra_sleep:
+            logging.info("Extra sleep, more %s sec" % SLEEP_TIME)
+            sleep(SLEEP_TIME)
 
         err_msg = []
         self.check_wrong_samples(err_msg)
@@ -263,6 +267,10 @@ class PtpTest(object):
         for machine_obj in self.machines.values():
             machine_obj.sysctl_set()
 
+        # In the first time it takes for clocks more time be locked.
+        self.run_test(transport="UDPv6", desc="IPv6", extra_sleep=True)
+        self.run_test(transport="L2", desc="IEEE-802.3")
+
         sppeds = self.get_speeds()
         for speed in sppeds:
             with PortSpeed(self.machines, speed):
@@ -271,9 +279,6 @@ class PtpTest(object):
 
         with LargeDrift(self.machines):
             self.run_test(transport="UDPv4", desc="Large drift test")
-
-        self.run_test(transport="UDPv6", desc="IPv6")
-        self.run_test(transport="L2", desc="IEEE-802.3")
 
         for machine_obj in self.machines.values():
             machine_obj.sysctl_restore()
