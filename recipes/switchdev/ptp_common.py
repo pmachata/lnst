@@ -240,8 +240,8 @@ class PtpTest(object):
         sleep(SLEEP_TIME)
 
         if extra_sleep:
-            logging.info("Extra sleep, more %d sec" % (4*SLEEP_TIME))
-            sleep(4*SLEEP_TIME)
+            logging.info("Extra sleep, more %d sec" % (7*SLEEP_TIME))
+            sleep(7*SLEEP_TIME)
 
         err_msg = []
         self.check_wrong_samples(err_msg)
