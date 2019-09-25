@@ -240,8 +240,8 @@ class PtpTest(object):
         sleep(SLEEP_TIME)
 
         if extra_sleep:
-            logging.info("Extra sleep, more %d sec" % (7*SLEEP_TIME))
-            sleep(7*SLEEP_TIME)
+            logging.info("Extra sleep, more %d sec" % (3*SLEEP_TIME))
+            sleep(3*SLEEP_TIME)
 
         err_msg = []
         self.check_wrong_samples(err_msg)
@@ -255,12 +255,12 @@ class PtpTest(object):
             proccess.kill()
 
     def get_speeds(self):
-        speeds = [1000, 10000]
+        speeds = [(1000, True), (10000, False)]
         for machine_obj in self.machines.values():
             if not machine_obj.is_supported_speed('100000'):
                 return speeds
 
-        speeds.append(100000)
+        speeds.append((100000, False))
         return speeds
 
     def run_tests(self):
@@ -268,14 +268,14 @@ class PtpTest(object):
             machine_obj.sysctl_set()
 
         # In the first time it takes for clocks more time be locked.
-        self.run_test(transport="UDPv6", desc="IPv6", extra_sleep=True)
+        self.run_test(transport="UDPv6", desc="IPv6")
         self.run_test(transport="L2", desc="IEEE-802.3")
 
         sppeds = self.get_speeds()
-        for speed in sppeds:
+        for speed, extra_sleep in sppeds:
             with PortSpeed(self.machines, speed):
                 self.run_test(transport="UDPv4", desc="port speed = %s"
-                        % speed)
+                        % speed, extra_sleep=extra_sleep)
 
         with LargeDrift(self.machines):
             self.run_test(transport="UDPv4", desc="Large drift test")
