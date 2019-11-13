@@ -115,8 +115,15 @@ def do_task(ctl, hosts, ifaces, aliases):
         sleep(60)
         ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
                   count=25, ipv6=True)
+
+	# N.B. this test causes the ping packets to trap due to
+	# IPV4_LPM_UNICAST_MISS. The miss is in underlay route. mlxsw assumes
+	# the underlay for an unbound GRE device is the same VRF that the GRE is
+	# in, and there's no route in that VRF. So it traps the packet. But in
+	# Linux, the underlay route is looked up in main VRF, so the packet is
+	# forwarded.
         ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g4,
-                  count=25, fail_expected=True)
+                  count=25, require_fastpath=False, require_slowpath=True)
 
         sw.run("ip link set dev %s nomaster" % g4.get_devname())
 
