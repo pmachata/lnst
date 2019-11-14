@@ -31,7 +31,7 @@ def do_task(ctl, hosts, ifaces, aliases):
     with encap_route(m2, vrf_None, 1, "gre1", ip=ipv4), \
          encap_route(m2, vrf_None, 1, "gre1", ip=ipv6), \
          vrf(sw) as vrf1, \
-         dummy(sw, vrf1, ip=["1.2.3.4/32"]) as d, \
+         dummy(sw, vrf_None, ip=["1.2.3.4/32"]) as d, \
          gre(sw, None, vrf1,
              tos="inherit",
              local_ip="1.2.3.4",
@@ -39,10 +39,9 @@ def do_task(ctl, hosts, ifaces, aliases):
          encap_route(sw, vrf1, 2, g, ip=ipv4), \
          encap_route(sw, vrf1, 2, g, ip=ipv6):
 
-        connect_host_ifaces(sw, sw_if1, vrf1, sw_if2, vrf1)
+	sw.run("ip l set dev %s master %s" % (sw_if1.get_devname(), vrf1))
         sw_if1.reset()
-        sw_if2.reset()
-        add_forward_route(sw, vrf1, "1.2.3.5")
+        add_forward_route(sw, vrf_None, "1.2.3.5")
         tl.wait_for_if(ifaces)
 
         ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g,

@@ -85,60 +85,6 @@ def do_task(ctl, hosts, ifaces, aliases):
                           ipv6=True)
                 ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)
 
-    # IPv4 should go through g4, IPv6 through g6, but g4 starts out in the
-    # wrong VRF. Thus there's no conflict and both g4 and g6 are offloaded.
-    # When the configuration of g4 is fixed, both tunnels are forced to slow
-    # path, but now they both work.
-    # There's a similar test in ipip-010 for local address change.
-    logging.info("--- That causes local conflict")
-    with vrf(sw) as vrf1, \
-         \
-         encap_route(m2, vrf_None, 1, "gre1", ip=ipv4), \
-         gre(sw, None, vrf1,
-             tos="inherit",
-             local_ip="1.2.3.4",
-             remote_ip="1.2.3.5",
-             ip=["1.2.3.4/32"]) as g4, \
-         \
-         encap_route(m2, vrf_None, 1, "gre2", ip=ipv6), \
-         gre(sw, None, vrf_None,
-             tos="inherit",
-             local_ip="1.2.3.4",
-             remote_ip="1.2.3.5",
-             ikey=2222, okey=1111,
-             ip=["1.2.3.4/32"]) as g6, \
-         encap_route(sw, vrf_None, 2, g6, ip=ipv6):
-
-        route = encap_route(sw, vrf_None, 2, g4, ip=ipv4)
-        route.do("add")
-
-        sleep(60)
-        ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
-                  count=25, ipv6=True)
-
-	# N.B. this test causes the ping packets to trap due to
-	# IPV4_LPM_UNICAST_MISS. The miss is in underlay route. mlxsw assumes
-	# the underlay for an unbound GRE device is the same VRF that the GRE is
-	# in, and there's no route in that VRF. So it traps the packet. But in
-	# Linux, the underlay route is looked up in main VRF, so the packet is
-	# forwarded.
-        ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g4,
-                  count=25, require_fastpath=False, require_slowpath=True)
-
-        sw.run("ip link set dev %s nomaster" % g4.get_devname())
-
-        # The VRF motion drops the encap route, so re-add it.
-        route.do("add")
-
-        sleep(5)
-        ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
-                  ipv6=True, require_fastpath=False, require_slowpath=True)
-        ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g4,
-                  require_fastpath=False, require_slowpath=True)
-
-        route.do("del")
-
-
 do_task(ctl, [ctl.get_host("machine1"),
               ctl.get_host("machine2"),
               ctl.get_host("switch")],
