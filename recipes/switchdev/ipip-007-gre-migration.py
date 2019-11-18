@@ -55,6 +55,59 @@ def do_task(ctl, hosts, ifaces, aliases):
                     ipv6=True)
             ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g)
 
+    # IPv4 goes through the GRE device g4, IPv6 through g6. They are both in the
+    # same VRF, as are ingress and egress devices. g6 additionally has underlay
+    # in that VRF as well, but g4's underlay is in another VRF. Therefore we
+    # expect that g6 is offloaded and passes traffic, whereas g4 is offloaded,
+    # but does not pass traffic.
+    #
+    # Afterwards, g4's underlay is moved to the same VRF where everything else
+    # is. This causes local address conflict, and unoffload of g4 and g6. Thus
+    # traffic passes, but through slow path.
+    #
+    # There's a similar test in ipip-010 for local address change.
+    logging.info("--- That causes local conflict")
+    with encap_route(m2, vrf_None, 1, "gre1", ip=ipv4), \
+         encap_route(m2, vrf_None, 1, "gre2", ip=ipv6), \
+	 vrf(sw) as vrf1, \
+	 vrf(sw) as vrf2:
+
+        connect_host_ifaces(sw, sw_if1, vrf2, sw_if2, vrf2)
+        sw_if1.reset()
+        sw_if2.reset()
+        add_forward_route(sw, vrf2, "1.2.3.5")
+
+	with dummy(sw, vrf1, ip=["1.2.3.4/32"]) as d4, \
+	     gre(sw, d4, vrf2,
+		 tos="inherit",
+		 local_ip="1.2.3.4",
+		 remote_ip="1.2.3.5") as g4, \
+		 encap_route(sw, vrf2, 2, g4, ip=ipv4), \
+		 \
+	     dummy(sw, vrf2, ip=["1.2.3.4/32"]) as d6, \
+	     gre(sw, d6, vrf2,
+		 tos="inherit",
+		 local_ip="1.2.3.4",
+		 remote_ip="1.2.3.5",
+		 ikey=2222, okey=1111,
+		 ip=["1.2.3.4/32"]) as g6, \
+		 encap_route(sw, vrf2, 2, g6, ip=ipv6):
+
+	    sleep(30)
+	    ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
+		    count=25, ipv6=True)
+
+	    ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g4,
+		    count=25, fail_expected=True)
+
+	    sw.run("ip link set dev %s master %s" % (d4.get_devname(), vrf2))
+
+	    sleep(5)
+	    ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
+		    ipv6=True, require_fastpath=False, require_slowpath=True)
+	    ping_test(tl, m1, sw, ipv4(onet2_ip(ctl, 33, [])), m1_if1, g4,
+		    require_fastpath=False, require_slowpath=True)
+
     logging.info("=== OL migration")
     with encap_route(m2, vrf_None, 1, "gre1", ip=ipv4), \
          encap_route(m2, vrf_None, 1, "gre1", ip=ipv6):
