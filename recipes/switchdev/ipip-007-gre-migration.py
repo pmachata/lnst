@@ -93,6 +93,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 		 ip=["1.2.3.4/32"]) as g6, \
 		 encap_route(sw, vrf2, 2, g6, ip=ipv6):
 
+	    tl.wait_for_if(ifaces)
 	    sleep(30)
 	    ping_test(tl, m1, sw, ipv6(onet2_ip(ctl, 33, [])), m1_if1, g6,
 		    count=25, ipv6=True)
