@@ -700,6 +700,7 @@ class Device(object):
         stats = {"devname": self._name,
                  "hwaddr": self._hwaddr}
         try:
+            out, _ = exec_cmd("ethtool -S %s" % self._name)
             out, _ = exec_cmd("ip -s link show %s" % self._name)
         except:
             return {}
