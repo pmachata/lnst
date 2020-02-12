@@ -699,8 +699,9 @@ class Device(object):
     def link_stats(self):
         stats = {"devname": self._name,
                  "hwaddr": self._hwaddr}
-        try:
+        if self._driver is not None and 'mlx5' in self._driver:
             out, _ = exec_cmd("ethtool -S %s" % self._name)
+        try:
             out, _ = exec_cmd("ip -s link show %s" % self._name)
         except:
             return {}
