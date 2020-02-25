@@ -51,7 +51,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             add_forward_route(sw, vrf_None, "1.2.3.5")
             tl.wait_for_if(ifaces)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                       ipv6=True)
             ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
@@ -60,7 +60,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             g.set_link_down()
             sleep(5)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                       count=25, fail_expected=True, ipv6=True)
             ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g,
                       count=25, fail_expected=True)
@@ -72,7 +72,7 @@ def do_task(ctl, hosts, ifaces, aliases):
         g.set_addresses(["1.2.3.4/32"])
         sleep(5)
 
-        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                   count=25, fail_expected=True, ipv6=True)
         ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g,
                   count=25, fail_expected=True)
@@ -81,7 +81,7 @@ def do_task(ctl, hosts, ifaces, aliases):
         g.set_link_up()
         sleep(5)
 
-        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+        ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                   ipv6=True)
         ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
@@ -104,7 +104,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             logging.info("--- hierarchical configuration")
             tl.wait_for_if(ifaces)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                       ipv6=True)
             ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
@@ -115,7 +115,7 @@ def do_task(ctl, hosts, ifaces, aliases):
             d.set_link_down()
             sleep(5)
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                       ipv6=True)
             ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
@@ -130,7 +130,7 @@ def do_task(ctl, hosts, ifaces, aliases):
                  local_ip="1.2.3.4",
                  remote_ip="1.2.3.5") as g:
 
-            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), m2_gre1, g,
+            ping_test(tl, m2, sw, ipv6(onet1_ip(ctl, 33, [])), None, g,
                       ipv6=True)
             ping_test(tl, m2, sw, ipv4(onet1_ip(ctl, 33, [])), None, g)
 
