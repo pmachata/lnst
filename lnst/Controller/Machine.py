@@ -17,7 +17,7 @@ import os
 import tempfile
 import signal
 from time import sleep
-from xmlrpclib import Binary
+from xmlrpc.client import Binary
 from functools import wraps
 from lnst.Common.Config import lnst_config
 from lnst.Common.NetUtils import normalize_hwaddr
@@ -144,7 +144,7 @@ class Machine(object):
             del self._device_database[update_msg["if_index"]]
 
     def dev_db_get_name(self, dev_name):
-        for if_index, dev in self._device_database.iteritems():
+        for if_index, dev in list(self._device_database.items()):
             if dev.get_name() == dev_name:
                 return dev
         return None
@@ -308,7 +308,7 @@ class Machine(object):
         self._slave_desc = slave_desc
 
         devices = self._rpc_call("get_devices")
-        for if_index, dev in devices.items():
+        for if_index, dev in list(devices.items()):
             self._device_database[if_index] = Device(dev, self)
 
         for iface in self._interfaces:
@@ -434,7 +434,7 @@ class Machine(object):
         try:
             cmd_res = self._rpc_call_x(netns, "run_command", command)
         except MachineError as exc:
-	    logging.info("Exception: %s" % exc)
+            logging.info("Exception: %s" % exc)
             if "proc_id" in command:
                 cmd_res = self._rpc_call_x(netns, "kill_command",
                                            command["proc_id"])
@@ -553,8 +553,8 @@ class Machine(object):
     def sync_resources(self, required):
         self._rpc_call("clear_resource_table")
 
-        for res_type, resources in required.iteritems():
-            for res_name, res in resources.iteritems():
+        for res_type, resources in list(required.items()):
+            for res_name, res in list(resources.items()):
                 has_resource = self._rpc_call("has_resource", res["hash"])
                 if not has_resource:
                     msg = "Transfering %s %s to machine %s" % \
@@ -915,7 +915,7 @@ class Interface(object):
                   "network_label": self._network,
                   "type": self._type,
                   "addresses": self._addresses,
-                  "slaves": self._slaves.keys(),
+                  "slaves": list(self._slaves.keys()),
                   "options": self._options,
                   "slave_options": self._slave_options,
                   "master": None,
@@ -997,12 +997,12 @@ class Interface(object):
         if not self._configured:
             return
 
-	while len(self._routes):
-		route = self._routes[0]
-		if route[1] == None:
-			self.del_route(route[0], route[2])
-		else:
-			self.del_nhs_route(route[0], route[1], route[2])
+        while len(self._routes):
+                route = self._routes[0]
+                if route[1] == None:
+                        self.del_route(route[0], route[2])
+                else:
+                        self.del_nhs_route(route[0], route[1], route[2])
 
         self._machine._rpc_call_x(self._netns, "deconfigure_interface",
                                   self.get_id())
@@ -1454,7 +1454,7 @@ class Device(object):
     def get_ip_addrs(self, selector={}):
         return [ip["addr"]
                 for ip in self._ip_addrs
-                    if selector.items() <= ip.items()]
+                    if list(selector.items()) <= list(ip.items())]
 
     @pre_call_decorate
     def get_ip_addr(self, num, selector={}):

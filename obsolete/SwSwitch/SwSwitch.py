@@ -15,7 +15,7 @@ import signal
 import select, logging
 from Common.Logs import Logs
 from Common.XmlRpc import Server
-from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+from xmlrpc.server import SimpleXMLRPCRequestHandler
 from NetConfig.NetConfig import NetConfig
 from Common.Utils import die_when_parent_die
 from NetConfig.NetConfigCommon import get_option

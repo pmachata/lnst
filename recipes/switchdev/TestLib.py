@@ -230,20 +230,20 @@ class TestLib:
             desc = self._generate_default_desc(sender, recivers)
 
         sender.set_mtu(self._mtu)
-        map(lambda i:i.set_mtu(self._mtu), recivers)
+        list(map(lambda i:i.set_mtu(self._mtu), recivers))
 
         sender_host = sender.get_host()
-        recivers_host = map(lambda i:i.get_host(), recivers)
+        recivers_host = [i.get_host() for i in recivers]
 
-        map(lambda i:i.sync_resources(modules=["Iperf"]),
-            recivers_host)
+        list(map(lambda i:i.sync_resources(modules=["Iperf"]),
+            recivers_host))
 
         duration = self._netperf_duration
         speed = self._mc_speed
 
         # read link-stats
         sender_stats_before = sender.link_stats()
-        recivers_stats_before = map(lambda i:i.link_stats(), recivers)
+        recivers_stats_before = [i.link_stats() for i in recivers]
 
         # An send traffic to all listeners but bridged
         cli_m = self._get_iperf_cli_mod(mc_group, duration, speed)
@@ -252,7 +252,7 @@ class TestLib:
 
         # re-read link-stats
         sender_stats_after = sender.link_stats()
-        recivers_stats_after = map(lambda i:i.link_stats(), recivers)
+        recivers_stats_after = [i.link_stats() for i in recivers]
 
         def wrap_sub(after, before, lim=1<<64):
             return (after - before) % lim
@@ -260,8 +260,8 @@ class TestLib:
         # Check that who got multi cast traffic
         tx = wrap_sub(sender_stats_after["tx_bytes"],
                       sender_stats_before["tx_bytes"])
-        rx = map(lambda i,l:wrap_sub(i["rx_bytes"], l["rx_bytes"]),
-                 recivers_stats_after, recivers_stats_before)
+        rx = list(map(lambda i,l:wrap_sub(i["rx_bytes"], l["rx_bytes"]),
+                 recivers_stats_after, recivers_stats_before))
         recivers_result = [rate > self._mc_high_thershold for rate in rx]
         for i in zip(rx, recivers):
             logging.info("Measured traffic on %s:%s is %dMb, bytes lost %d (%d%%)" %
@@ -306,19 +306,19 @@ class TestLib:
         m1.sync_resources(modules=["PktgenTx"])
 
         pktgen_option = []
-        if "count" not in kwargs.keys():
+        if "count" not in list(kwargs.keys()):
             pktgen_option.append("count 10000")
-        if "clone_skb" not in kwargs.keys():
+        if "clone_skb" not in list(kwargs.keys()):
             pktgen_option.append("clone_skb 0")
-        if "delay" not in kwargs.keys():
+        if "delay" not in list(kwargs.keys()):
             pktgen_option.append("delay 0")
-        if "dst_mac" not in kwargs.keys():
+        if "dst_mac" not in list(kwargs.keys()):
             pktgen_option.append("dst_mac %s" % if2.get_hwaddr())
         pktgen_option.append("pkt_size %s" % pkt_size)
-        if "dst" not in kwargs.keys() and "dst_min" not in kwargs.keys() and \
-           "dst_max" not in kwargs.keys():
+        if "dst" not in list(kwargs.keys()) and "dst_min" not in list(kwargs.keys()) and \
+           "dst_max" not in list(kwargs.keys()):
             pktgen_option.append("dst %s" % if2.get_ip(0))
-        for arg, argval in kwargs.iteritems():
+        for arg, argval in kwargs.items():
             if arg == "vlan_id":
                 pktgen_option.insert(0, "{} {}".format(arg, argval))
                 continue
@@ -439,7 +439,7 @@ class TestLib:
         ie_tc = "itc" if ingress else "etc"
         iface_name = iface.get_devname()
 
-        return d["occupancy"][unicode(iface_name)][ie_tc][str(tc)]["max"]
+        return d["occupancy"][str(iface_name)][ie_tc][str(tc)]["max"]
 
     def _devlink_port_tc_pool_get(self, iface, tc, ingress):
         iface_name = iface.get_devname()
@@ -449,7 +449,7 @@ class TestLib:
         ingress = "ingress" if ingress else "egress"
         cmd = "devlink sb tc bind show {} tc {} type {} -j"
         d = self.run_json_cmd(m, cmd.format(iface_name, tc, ingress))
-        return d["tc_bind"][unicode(iface_name)][0]["pool"]
+        return d["tc_bind"][str(iface_name)][0]["pool"]
 
     def _devlink_pool_size_get(self, m, devlink_dev, pool):
         cmd = "devlink sb pool show {} pool {} -j"
@@ -569,12 +569,12 @@ class vrf:
             pass
     """
 
-    counter = iter(range(1000))
+    counter = iter(list(range(1000)))
     def __init__(self, sw):
         """Args:
             sw: The machine to create the VRF on.
         """
-        self._id = self.__class__.counter.next()
+        self._id = next(self.__class__.counter)
         self._sw = sw
 
     def _dev(self):

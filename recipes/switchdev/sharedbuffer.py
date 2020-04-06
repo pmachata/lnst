@@ -24,7 +24,7 @@ class RandomValuePicker:
             self._pools.append(pool)
 
     def _cell_size(self):
-	return self._pools[0]["cell_size"]
+        return self._pools[0]["cell_size"]
 
     def _get_static_size(self, th):
         # For threshold of 16, this works out to be about 12MB on Spectrum-1,
@@ -42,8 +42,8 @@ class RandomValuePicker:
         th = random.randint(3,16)
         if pool["thtype"] == "dynamic":
             return th
-	else:
-	    return self._get_static_size(th)
+        else:
+            return self._get_static_size(th)
 
     def _get_pool(self, direction):
         ing_pools = []
@@ -63,13 +63,13 @@ class RandomValuePicker:
         if isinstance(objid, Pool):
             if objid["pool"] in [4, 8, 9, 10]:
                 # The threshold type of pools 4, 8, 9 and 10 cannot be changed
-	        raise SkipTest()
+                raise SkipTest()
             else:
                 return (self._get_size(), self._get_thtype())
         if isinstance(objid, TcBind):
             if objid["tc"] >= 8:
                 # Multicast TCs cannot be changed
-	        raise SkipTest()
+                raise SkipTest()
             else:
                 pool = self._get_pool(objid["type"])
                 th = self._get_th(pool)
@@ -94,10 +94,10 @@ class RecordValuePicker:
     def get_value(self, objid):
         if isinstance(objid, Pool) and objid["pool"] in [4, 8, 9, 10]:
             # The threshold type of pools 4, 8, 9 and 10 cannot be changed
-	    raise SkipTest()
+            raise SkipTest()
         if isinstance(objid, TcBind) and objid["tc"] >= 8:
             # Multicast TCs cannot be changed
-	    raise SkipTest()
+            raise SkipTest()
         for rec in self._recs:
             if rec["objid"].weak_eq(objid):
                 return rec["value"]

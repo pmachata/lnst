@@ -52,7 +52,7 @@ class RedTestLib:
         self.tl = tl
         self.switch = switch
         self.links = links
-        self.ports = links.keys()
+        self.ports = list(links.keys())
         self.router = router
         if no_init:
             pass
@@ -113,7 +113,7 @@ class RedTestLib:
     def choose_parent(self, parent):
         self.configs[self.parent] = (self.rate, self.min, self.max)
         self.parent = parent
-        if self.configs.has_key(self.parent):
+        if self.parent in self.configs:
             self.rate, self.min, self.max = self.configs[self.parent]
         else:
             self.rate, self.min, self.max = self.speed_base, 0, 0

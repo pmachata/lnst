@@ -106,7 +106,7 @@ def do_task(ctl, hosts, ifaces, aliases):
 
         mirror_status = {"ingress": False, "egress": False }
         for i in range(10):
-            change = random.choice(mirror_status.keys())
+            change = random.choice(list(mirror_status.keys()))
             change_mirror_status(mirror_status, change, mirred_port, sw_if3)
 
             in_num = 10 if mirror_status["ingress"] else 0

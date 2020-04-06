@@ -140,7 +140,7 @@ class BridgeTool:
     def _add_del_mdb(self, op, br_mdb_info):
         cmd = "bridge mdb %s dev %s port %s grp %s" % \
               (op, self._dev_name, br_mdb_info["hwaddr"], br_mdb_info["group"])
-        if br_mdb_info.has_key("permanent") and \
+        if "permanent" in br_mdb_info and \
            br_mdb_info["permanent"] == True:
             cmd += " permanent"
         exec_cmd(cmd)

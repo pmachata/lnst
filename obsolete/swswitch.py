@@ -23,14 +23,14 @@ def usage():
     """
     Print usage of this app
     """
-    print "Usage: swswitch.py [OPTION...] ACTION"
-    print ""
-    print "ACTION = [run]"
-    print ""
-    print "  -d, --debug                             emit debugging messages"
-    print "  -h, --help                              print this message"
-    print "  -m, --machine-config=FILE               use this machine configuration file"
-    print "  -p, --port                              xmlrpc port"
+    print("Usage: swswitch.py [OPTION...] ACTION")
+    print("")
+    print("ACTION = [run]")
+    print("")
+    print("  -d, --debug                             emit debugging messages")
+    print("  -h, --help                              print this message")
+    print("  -m, --machine-config=FILE               use this machine configuration file")
+    print("  -p, --port                              xmlrpc port")
     sys.exit()
 
 def main():
@@ -45,7 +45,7 @@ def main():
             ["debug", "help", "machine-config=", "port="]
         )
     except getopt.GetoptError as err:
-        print str(err)
+        print(str(err))
         usage()
         sys.exit()
 

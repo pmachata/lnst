@@ -52,7 +52,7 @@ class Machine(object):
                 self.machine.run("sysctl -w %s=0" % key)
 
     def sysctl_restore(self):
-            for key, value in self.sysctl_orig.items():
+            for key, value in list(self.sysctl_orig.items()):
                 self.machine.run("sysctl -w %s=%s" % (key, value))
 
     def is_supported_speed(self, speed):
@@ -98,7 +98,7 @@ class PortSpeed(object):
         self._speed = speed
 
     def set_speed(self, command):
-        for machine_obj in self._machines.values():
+        for machine_obj in list(self._machines.values()):
             m = machine_obj.get_machine()
             for iface in machine_obj.get_ifaces():
                 m.run("ethtool -s %s %s" % (iface.get_devname(), command))
@@ -121,7 +121,7 @@ class LargeDrift(object):
     def __exit__(self, exc_type, exc_value, traceback):
         # Have to reset all clocks and not only master clock because all
         # of them were synchronized with master clock after ptp running.
-        for machine_obj in self._machines.values():
+        for machine_obj in list(self._machines.values()):
             m = machine_obj.get_machine()
             ifaces = machine_obj.get_ifaces()
 
@@ -147,11 +147,11 @@ class PtpTest(object):
     def write_ini(self, machine_name):
         cfg = self.machines[machine_name].get_cfg()
         with tempfile.NamedTemporaryFile(prefix="ini-", dir="/tmp") as inifile:
-            for sect, opts in cfg.items():
-                inifile.write("[%s]\n" % sect)
-                for opt, val in opts.items():
-                    inifile.write("%s %s\n" % (opt, val))
-                inifile.write("\n")
+            for sect, opts in list(cfg.items()):
+                inifile.write(("[%s]\n" % sect).encode())
+                for opt, val in list(opts.items()):
+                    inifile.write(("%s %s\n" % (opt, val)).encode())
+                inifile.write(b"\n")
 
             inifile.flush()
 
@@ -162,7 +162,7 @@ class PtpTest(object):
 
     def run_ptp4l(self):
         cleanup = []
-        for machine_obj in self.machines.values():
+        for machine_obj in list(self.machines.values()):
             interfaces = machine_obj.get_ifaces()
 
             m = machine_obj.get_machine()
@@ -174,7 +174,7 @@ class PtpTest(object):
         return cleanup
 
     def init_setup(self, transport):
-        for machine_obj in self.machines.values():
+        for machine_obj in list(self.machines.values()):
             machine_obj.configure(transport)
 
     def get_param_value(self, cmd_out, param):
@@ -218,7 +218,7 @@ class PtpTest(object):
                         (wrong, NUMBER_OF_CHECKS, machine_name))
 
     def check_hops(self, err_msg):
-        for machine_obj in self.machines.values():
+        for machine_obj in list(self.machines.values()):
             m = machine_obj.get_machine()
             uds_address = machine_obj.get_uds_address()
             desired_hops = machine_obj.get_desired_hops()
@@ -256,7 +256,7 @@ class PtpTest(object):
 
     def get_speeds(self):
         speeds = [(1000, True), (10000, False)]
-        for machine_obj in self.machines.values():
+        for machine_obj in list(self.machines.values()):
             if not machine_obj.is_supported_speed('100000'):
                 return speeds
 
@@ -264,7 +264,7 @@ class PtpTest(object):
         return speeds
 
     def run_tests(self):
-        for machine_obj in self.machines.values():
+        for machine_obj in list(self.machines.values()):
             machine_obj.sysctl_set()
 
         # In the first time it takes for clocks more time be locked.
@@ -280,5 +280,5 @@ class PtpTest(object):
         with LargeDrift(self.machines):
             self.run_test(transport="UDPv4", desc="Large drift test")
 
-        for machine_obj in self.machines.values():
+        for machine_obj in list(self.machines.values()):
             machine_obj.sysctl_restore()

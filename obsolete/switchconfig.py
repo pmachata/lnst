@@ -18,13 +18,13 @@ def usage():
     """
     Print usage of this app
     """
-    print "Usage: switchconfig.py [OPTION...] ACTION"
-    print ""
-    print "ACTION = [config | clear | dump]"
-    print ""
-    print "  -d, --debug                             emit debugging messages"
-    print "  -h, --help                              print this message"
-    print "  -c, --config=FILE                       use this net configuration file"
+    print("Usage: switchconfig.py [OPTION...] ACTION")
+    print("")
+    print("ACTION = [config | clear | dump]")
+    print("")
+    print("  -d, --debug                             emit debugging messages")
+    print("  -h, --help                              print this message")
+    print("  -c, --config=FILE                       use this net configuration file")
     sys.exit()
 
 def main():
@@ -39,7 +39,7 @@ def main():
             ["debug", "help", "config=", "machine-config=", "action="]
         )
     except getopt.GetoptError as err:
-        print str(err)
+        print(str(err))
         usage()
         sys.exit()
 

@@ -23,7 +23,7 @@ class PrioTestLib:
     def __init__(self, tl, switch, links):
         self.tl = tl
         self.switch = switch
-        ports = links.keys()
+        ports = list(links.keys())
         self.egress_port = ports[0]
         self.ingress_port = ports[1]
         self.recieving_agent = links[ports[0]]

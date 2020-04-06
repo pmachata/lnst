@@ -407,7 +407,7 @@ trex_server.intr()
 
 port0_rates = [i["port_0"]["rx_pps"] for i in trex_result["res_data"]["results"]]
 port1_rates = [i["port_1"]["rx_pps"] for i in trex_result["res_data"]["results"]]
-aggregate_rates = map(sum, zip(port0_rates, port1_rates))
+aggregate_rates = list(map(sum, list(zip(port0_rates, port1_rates))))
 
 aggr_std_dev = std_deviation(aggregate_rates)
 

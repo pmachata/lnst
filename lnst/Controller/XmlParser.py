@@ -15,7 +15,7 @@ import re
 import sys
 import copy
 from lxml import etree
-from urllib2 import urlopen
+from urllib.request import urlopen
 from lnst.Common.Config import lnst_config
 from lnst.Controller.XmlTemplates import XmlTemplates
 from lnst.Controller.XmlProcessing import XmlProcessingError
