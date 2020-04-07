@@ -23,7 +23,7 @@ import gzip
 import os
 from time import gmtime, strftime
 from distutils.core import setup
-from lnst.Common.Version import LNSTMajorVersion
+from .lnst.Common.Version import LNSTMajorVersion
 
 def process_template(template_path, values):
     template_name_re = "\.in$"
@@ -34,7 +34,7 @@ def process_template(template_path, values):
     t = open(template_path, "r")
     f = open(file_path, "w")
     template = t.read()
-    for var, value in values.iteritems():
+    for var, value in values.items():
         template = template.replace("@%s@" % var, value)
     f.write(template)
     f.close()

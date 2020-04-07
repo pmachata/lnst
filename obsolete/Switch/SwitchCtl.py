@@ -13,7 +13,7 @@ jpirko@redhat.com (Jiri Pirko)
 import logging
 import copy
 import imp
-from SwitchConfigParse import SwitchConfigParse
+from .SwitchConfigParse import SwitchConfigParse
 
 class SwitchCtl:
     def __init__(self, config_xml):

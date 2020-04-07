@@ -165,20 +165,20 @@ class XmlData(dict):
         return XmlDataIterator(it)
 
     def iteritems(self):
-        it = iter(super(XmlData, self).items())
+        it = iter(list(super(XmlData, self).items()))
         return XmlDataIterator(it)
 
     def iterkeys(self):
-        it = iter(super(XmlData, self).keys())
+        it = iter(list(super(XmlData, self).keys()))
         return XmlDataIterator(it)
 
     def itervalues(self):
-        it = iter(super(XmlData, self).values())
+        it = iter(list(super(XmlData, self).values()))
         return XmlDataIterator(it)
 
     def to_dict(self):
         new_dict = dict()
-        for key, value in self.items():
+        for key, value in list(self.items()):
             if isinstance(value, XmlData):
                 new_val = value.to_dict()
             elif isinstance(value, XmlCollection):

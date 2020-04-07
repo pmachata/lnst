@@ -29,14 +29,14 @@ def usage():
     """
     Print usage of this app
     """
-    print "Usage: netconfig.py [OPTION...] ACTION"
-    print ""
-    print "ACTION = [up | down | dump | cleanup | test]"
-    print ""
-    print "  -d, --debug                             emit debugging messages"
-    print "  -h, --help                              print this message"
-    print "  -c, --config=FILE                       use this net configuration file"
-    print "  -m, --machine-config=FILE               use this machine configuration file"
+    print("Usage: netconfig.py [OPTION...] ACTION")
+    print("")
+    print("ACTION = [up | down | dump | cleanup | test]")
+    print("")
+    print("  -d, --debug                             emit debugging messages")
+    print("  -h, --help                              print this message")
+    print("  -c, --config=FILE                       use this net configuration file")
+    print("  -m, --machine-config=FILE               use this machine configuration file")
     sys.exit()
 
 def prepare_machine_config(machine_file):
@@ -68,7 +68,7 @@ def prepare_netconfig(machine_file, config_file):
     config_parse.parse(config_dom)
 
     netconfig = NetConfig()
-    for key, entry in data["netconfig"].iteritems():
+    for key, entry in data["netconfig"].items():
         netconfig.add_interface_config(key, entry)
 
     return netconfig
@@ -90,7 +90,7 @@ def netmachineconfig_to_xml(machine_data):
     info_tag = "    <info %s%s%s/>\n" % (hostname, rootpass, rpcport)
 
     devices = ""
-    for phys_id, netdev in machine_data["netdevices"].iteritems():
+    for phys_id, netdev in machine_data["netdevices"].items():
         pid = "phys_id=\"%s\" " % phys_id
         dev_type = ""
         name = ""
@@ -121,7 +121,7 @@ def main():
             ["debug", "help", "config=", "machine-config=", "action="]
         )
     except getopt.GetoptError as err:
-        print str(err)
+        print(str(err))
         usage()
         sys.exit()
 
@@ -159,7 +159,7 @@ def main():
         logging.info("Refreshing machine config")
         machine_data = prepare_machine_config(machine_config_path)
         dev_names = NetConfigDevNames()
-        for dev_id, netdev in machine_data["netdevices"].iteritems():
+        for dev_id, netdev in machine_data["netdevices"].items():
             if "name" in netdev:
                 del netdev["name"]
             dev_names.assign_name_by_scan(dev_id, netdev)

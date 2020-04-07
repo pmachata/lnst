@@ -24,7 +24,7 @@ def test_standard_multicast(tl, sender, listeners, group, sw_br,
     for l in listeners:
             sw_br.add_br_mdb(str(peers[l].get_devname()), group)
 
-    bridged = peers.keys()
+    bridged = list(peers.keys())
     bridged.remove(sender)
     res = tl.iperf_mc(sender,  bridged, group)
     expected = [i in listeners for i in bridged]
@@ -46,7 +46,7 @@ def do_task(ctl, hosts, ifaces, bridges, aliases):
         bridge.set_br_mcast_snooping(False)
 
     # Create a bridge
-    sw_ports = peers.values()
+    sw_ports = list(peers.values())
     sw_br = sw.create_bridge(slaves=sw_ports, options={"vlan_filtering": 1,
                                                        "multicast_querier": 1})
 

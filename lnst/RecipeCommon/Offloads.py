@@ -39,7 +39,7 @@ def parse_offloads(offloads):
     sequence = re.findall(offloads_split, offloads)
     [offload_set[0].append(i) for i in sequence if not offload_set[0].count(i)]
 
-    opts_match = filter(None, re.findall(opts_split, offloads))
+    opts_match = [_f for _f in re.findall(opts_split, offloads) if _f]
 
     for opts in opts_match:
         sett = []

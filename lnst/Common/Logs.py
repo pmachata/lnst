@@ -106,7 +106,7 @@ class LoggingCtl:
         logger = logging.getLogger('')
         for i in list(logger.handlers):
             logger.removeHandler(i)
-        for key, logger in logging.Logger.manager.loggerDict.items():
+        for key, logger in list(logging.Logger.manager.loggerDict.items()):
             if type(logger) != type(logging.Logger):
                 continue
             for i in list(logger.handlers):

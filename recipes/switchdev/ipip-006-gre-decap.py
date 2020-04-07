@@ -23,11 +23,11 @@ def do_task(ctl, hosts, ifaces, aliases):
      sw_if1_10, sw_if1_20,
      sw_if2_10, sw_if2_20) = ifaces
 
-    for m, scopes in {m1: ("all", m1_if1_10.get_devname()),
+    for m, scopes in list({m1: ("all", m1_if1_10.get_devname()),
                       m2: ("all", m2_if1_20.get_devname()),
                       sw: ("all", "default",
                            sw_if1_10.get_devname(),
-                           sw_if2_10.get_devname())}.items():
+                           sw_if2_10.get_devname())}.items()):
         for scope in scopes:
             m.config("/proc/sys/net/ipv4/conf/%s/rp_filter" % scope, "0")
 

@@ -43,7 +43,7 @@ def do_task(ctl, hosts, ifaces, bridges, aliases):
         bridge.set_br_mcast_snooping(False)
 
     # Create a bridge
-    sw_ports = peers.values()
+    sw_ports = list(peers.values())
     sw_br = sw.create_bridge(slaves=sw_ports, options={"vlan_filtering":1,
                                                        "multicast_querier":1})
 

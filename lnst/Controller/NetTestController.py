@@ -245,7 +245,7 @@ class NetTestController:
             logging.info("  Setup is using virtual machines.")
         for m_id, m in sorted(match["machines"].items()):
             logging.info("  host \"%s\" uses \"%s\"" % (m_id, m["target"]))
-            for if_id, match in m["interfaces"].items():
+            for if_id, match in list(m["interfaces"].items()):
                 pool_id = match["target"]
                 logging.info("    interface \"%s\" matched to \"%s\"" %\
                                             (if_id, pool_id))
@@ -521,7 +521,7 @@ class NetTestController:
         if self._machines == None:
             return
 
-        for machine_id, machine in self._machines.items():
+        for machine_id, machine in list(self._machines.items()):
             if machine.is_configured():
                 try:
                     machine.cleanup(deconfigure)
@@ -536,7 +536,7 @@ class NetTestController:
 
         # remove dynamically created bridges
         if deconfigure:
-            for bridge in self._network_bridges.values():
+            for bridge in list(self._network_bridges.values()):
                 bridge.cleanup()
             self._network_bridges = {}
 
@@ -544,7 +544,7 @@ class NetTestController:
         #saves current virtual configuration to a file, after pickling it
         config_data = dict()
         machines = config_data["machines"] = {}
-        for m in self._machines.values():
+        for m in list(self._machines.values()):
             machine = machines[m.get_hostname()] = dict()
 
             if m.get_libvirt_domain() != None:
@@ -560,7 +560,7 @@ class NetTestController:
                     machine["interfaces"].append(hwaddr)
 
         config_data["bridges"] = bridges = []
-        for bridge in self._network_bridges.values():
+        for bridge in list(self._network_bridges.values()):
             bridges.append(bridge.get_name())
 
         with open("/tmp/.lnst_machine_conf", "wb") as f:
@@ -581,7 +581,7 @@ class NetTestController:
         if cfg:
             logging.info("Cleaning up leftover configuration from previous "\
                          "config_only run.")
-            for hostname, machine in cfg["machines"].items():
+            for hostname, machine in list(cfg["machines"].items()):
                 port = lnst_config.get_option("environment", "rpcport")
                 if test_tcp_connection(hostname, port):
                     s = socket.create_connection((hostname, port))
@@ -689,7 +689,7 @@ class NetTestController:
                 overall_res["err_msg"] = "Command exception raised."
                 break
 
-            for machine in self._machines.values():
+            for machine in list(self._machines.values()):
                 machine.restore_system_config()
 
             # task failed, check if we should quit_on_fail
@@ -790,13 +790,13 @@ class NetTestController:
 
     def _start_packet_capture(self):
         logging.info("Starting packet capture")
-        for machine_id, machine in self._machines.items():
+        for machine_id, machine in list(self._machines.items()):
             capture_files = machine.start_packet_capture()
             self._remote_capture_files[machine_id] = capture_files
 
     def _stop_packet_capture(self):
         logging.info("Stopping packet capture")
-        for machine_id, machine in self._machines.items():
+        for machine_id, machine in list(self._machines.items()):
             machine.stop_packet_capture()
 
     # TODO: Move this function to logging
@@ -804,7 +804,7 @@ class NetTestController:
         logging_root = self._log_ctl.get_recipe_log_path()
         logging_root = os.path.abspath(logging_root)
         logging.info("Retrieving capture files from slaves")
-        for machine_id, machine in self._machines.items():
+        for machine_id, machine in list(self._machines.items()):
             slave_logging_dir = os.path.join(logging_root, machine_id + "/")
             try:
                 os.mkdir(slave_logging_dir)
@@ -815,7 +815,7 @@ class NetTestController:
                     raise NetTestError(msg)
 
             capture_files = self._remote_capture_files[machine_id]
-            for if_id, remote_path in capture_files.items():
+            for if_id, remote_path in list(capture_files.items()):
                 filename = "%s.pcap" % if_id
                 local_path = os.path.join(slave_logging_dir, filename)
                 machine.copy_file_from_machine(remote_path, local_path)

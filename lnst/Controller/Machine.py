@@ -144,7 +144,7 @@ class Machine(object):
             del self._device_database[update_msg["if_index"]]
 
     def dev_db_get_name(self, dev_name):
-        for if_index, dev in self._device_database.items():
+        for if_index, dev in list(self._device_database.items()):
             if dev.get_name() == dev_name:
                 return dev
         return None
@@ -301,8 +301,8 @@ class Machine(object):
                 logging.warning(msg)
                 logging.warning(len(msg)*"=")
             else:
-                msg = "Controller and Slave '%s' versions are not compatible!"\
-                                                                    % hostname
+                msg = "Controller and Slave '%s' versions are not compatible: %s vs. %s!"\
+                    % (hostname, ctl_version, slave_version)
                 raise MachineError(msg)
 
         self._slave_desc = slave_desc
@@ -553,8 +553,8 @@ class Machine(object):
     def sync_resources(self, required):
         self._rpc_call("clear_resource_table")
 
-        for res_type, resources in required.items():
-            for res_name, res in resources.items():
+        for res_type, resources in list(required.items()):
+            for res_name, res in list(resources.items()):
                 has_resource = self._rpc_call("has_resource", res["hash"])
                 if not has_resource:
                     msg = "Transfering %s %s to machine %s" % \

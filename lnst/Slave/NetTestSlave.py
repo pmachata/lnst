@@ -181,7 +181,7 @@ class SlaveMethods:
             dev_data = dev.get_if_data()
             entry = {"name": dev.get_name(),
                      "hwaddr": dev.get_hwaddr()}
-            for key, value in params.items():
+            for key, value in list(params.items()):
                 if key not in dev_data or dev_data[key] != value:
                     entry = None
                     break
@@ -463,7 +463,7 @@ class SlaveMethods:
             raise Exception("Can't start packet capture, tcpdump not available")
 
         files = {}
-        for if_id, dev in self._if_manager.get_mapped_devices().items():
+        for if_id, dev in list(self._if_manager.get_mapped_devices().items()):
             if dev.get_netns() != None:
                 continue
             dev_name = dev.get_name()
@@ -489,7 +489,7 @@ class SlaveMethods:
         if self._packet_captures == None:
             return True
 
-        for if_index, pcap in self._packet_captures.items():
+        for if_index, pcap in list(self._packet_captures.items()):
             pcap.stop()
 
         self._packet_captures.clear()
@@ -497,7 +497,7 @@ class SlaveMethods:
         return True
 
     def _remove_capture_files(self):
-        for key, name in self._capture_files.items():
+        for key, name in list(self._capture_files.items()):
             logging.debug("Removing temporary packet capture file %s", name)
             os.unlink(name)
 
@@ -520,7 +520,7 @@ class SlaveMethods:
 
     def restore_system_config(self):
         logging.info("Restoring system configuration")
-        for option, values in self._system_config.items():
+        for option, values in list(self._system_config.items()):
             try:
                 cmd_str = "echo \"%s\" >%s" % (values["initial_val"], option)
                 (stdout, stderr) = exec_cmd(cmd_str)
@@ -604,7 +604,7 @@ class SlaveMethods:
         self.restore_system_config()
 
         devs = self._if_manager.get_mapped_devices()
-        for if_id, dev in devs.items():
+        for if_id, dev in list(devs.items()):
             peer = dev.get_peer()
             if peer == None:
                 dev.clear_configuration()
@@ -699,11 +699,11 @@ class SlaveMethods:
         return False
 
     def reset_file_transfers(self):
-        for file_handle in self._copy_targets.values():
+        for file_handle in list(self._copy_targets.values()):
             file_handle.close()
         self._copy_targets = {}
 
-        for file_handle in self._copy_sources.values():
+        for file_handle in list(self._copy_sources.values()):
             file_handle.close()
         self._copy_sources = {}
 
@@ -1425,7 +1425,7 @@ class ServerHandler(ConnectionHandler):
         self._netns_con_mapping = {}
 
     def update_connections(self, connections):
-        for key, connection in connections.items():
+        for key, connection in list(connections.items()):
             self.remove_connection_by_id(key)
             self.add_connection(key, connection)
 

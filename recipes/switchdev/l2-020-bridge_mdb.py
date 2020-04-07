@@ -26,7 +26,7 @@ def test_standard_mutlicast(tl, sender, listeners, bridged, group):
     res = tl.iperf_mc(sender,  listeners+ bridged, group)
     expected = [True for l in listeners] + [False for l in bridged]
     tl.mc_ipref_compare_result(listeners + bridged, res, expected)
-    map(lambda i:i.intr(), s_procs)
+    list(map(lambda i:i.intr(), s_procs))
 
 def do_task(ctl, hosts, ifaces, aliases):
     m1, m2, sw = hosts

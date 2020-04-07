@@ -36,7 +36,7 @@ def get_route_major(route_index):
     return MAJOR_MIN + route_index / MINORS_TOTAL
 
 def get_all_route_majors():
-    return range(get_route_major(0), get_route_major(ROUTES_COUNT - 1) + 1)
+    return list(range(get_route_major(0), get_route_major(ROUTES_COUNT - 1) + 1))
 
 def get_route_major_minor_range(major):
     minor_min = MINOR_MIN

@@ -43,7 +43,7 @@ class Icmp6Ping(TestGeneric):
         logging.debug("%s" % cmd)
 
         limit_rate = self.get_opt("limit_rate", default=80)
-        data_stdout = exec_cmd(cmd, die_on_err=False)[0]
+        data_stdout = exec_cmd(cmd, die_on_err=False)[0].decode()
 
         stat_pttr1 = r'(\d+) packets transmitted, (\d+) received'
         stat_pttr2 = r'rtt min/avg/max/mdev = (\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+) ms'

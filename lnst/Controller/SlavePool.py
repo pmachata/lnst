@@ -178,7 +178,7 @@ class SlavePool:
 
             # Check if there isn't any machine with the same
             # hostname or libvirt_domain already in the pool
-            for pm_id, m in pool.items():
+            for pm_id, m in list(pool.items()):
                 pm = m["params"]
                 rm = machine_spec["params"]
                 if pm["hostname"] == rm["hostname"]:
@@ -228,7 +228,7 @@ class SlavePool:
                     raise SlaveMachineError(msg, iface)
 
                 if_hwaddr = iface_spec["params"]["hwaddr"]
-                hwaddr_dups = [ k for k, v in machine_spec["interfaces"].items()\
+                hwaddr_dups = [ k for k, v in list(machine_spec["interfaces"].items())\
                                 if v["params"]["hwaddr"] == if_hwaddr ]
                 if len(hwaddr_dups) > 0:
                     msg = "Duplicate MAC address %s for interface '%s' and '%s'."\
@@ -348,7 +348,7 @@ class SlavePool:
 
         used = []
         if_map = self._map["machines"][tm_id]["interfaces"]
-        for t_if, p_if in if_map.items():
+        for t_if, p_if in list(if_map.items()):
             pool_id = p_if["target"]
             used.append(pool_id)
             if_data = pm["interfaces"][pool_id]
@@ -356,12 +356,12 @@ class SlavePool:
             iface = machine.new_static_interface(t_if, "eth")
             iface.set_hwaddr(if_data["params"]["hwaddr"])
 
-            for t_net, p_net in self._map["networks"].items():
+            for t_net, p_net in list(self._map["networks"].items()):
                 if pm["interfaces"][pool_id]["network"] == p_net:
                     iface.set_network(t_net)
                     break
 
-        for if_id, if_data in pm["interfaces"].items():
+        for if_id, if_data in list(pm["interfaces"].items()):
             if if_id not in used:
                 iface = machine.new_unused_interface("eth")
                 iface.set_hwaddr(if_data["params"]["hwaddr"])
@@ -384,13 +384,13 @@ class SlavePool:
                           pm["security"])
 
         # make all the existing unused
-        for if_id, if_data in pm["interfaces"].items():
+        for if_id, if_data in list(pm["interfaces"].items()):
             iface = machine.new_unused_interface("eth")
             iface.set_hwaddr(if_data["params"]["hwaddr"])
             iface.set_network(None)
 
         # add all the other devices
-        for if_id, if_data in tm["interfaces"].items():
+        for if_id, if_data in list(tm["interfaces"].items()):
             iface = machine.new_virtual_interface(if_id, "eth")
             iface.set_network(if_data["network"])
             if "hwaddr" in if_data["params"]:
@@ -425,10 +425,10 @@ class SetupMapper(object):
     def set_virtual(self, virt_value):
         self._virtual_matching = virt_value
 
-        for m_id, m in self._mreqs.items():
-            for if_id, interface in m["interfaces"].items():
+        for m_id, m in list(self._mreqs.items()):
+            for if_id, interface in list(m["interfaces"].items()):
                 if "params" in interface:
-                    for name, val in interface["params"].items():
+                    for name, val in list(interface["params"].items()):
                         if name not in ["hwaddr", "driver"]:
                             msg = "Dynamically created interfaces "\
                                   "only support the 'hwaddr' and 'driver' "\
@@ -451,7 +451,7 @@ class SetupMapper(object):
             self._pool = self._pools[self._pool_name]
 
         self._unmatched_pool_machines = []
-        for p_id, p_machine in sorted(iter(self._pool.items()), reverse=True):
+        for p_id, p_machine in sorted(iter(list(self._pool.items())), reverse=True):
             if self._virtual_matching:
                 if "libvirt_domain" in p_machine["params"]:
                     self._unmatched_pool_machines.append(p_id)
@@ -516,7 +516,7 @@ class SetupMapper(object):
                                      self._pool_name)
 
                         self._unmatched_pool_machines = []
-                        for p_id, p_machine in sorted(iter(self._pool.items()), reverse=True):
+                        for p_id, p_machine in sorted(iter(list(self._pool.items())), reverse=True):
                             if self._virtual_matching:
                                 if "libvirt_domain" in p_machine["params"]:
                                     self._unmatched_pool_machines.append(p_id)
@@ -621,7 +621,7 @@ class SetupMapper(object):
     def _check_machine_compatibility(self, req_id, pool_id):
         req_machine = self._mreqs[req_id]
         pool_machine = self._pool[pool_id]
-        for param, value in req_machine["params"].items():
+        for param, value in list(req_machine["params"].items()):
             # skip empty parameters
             if len(value) == 0:
                 continue
@@ -632,14 +632,14 @@ class SetupMapper(object):
 
     def _check_interface_compatibility(self, req_if, pool_if):
         label_mapping = self._net_label_mapping
-        for req_label, mapping in label_mapping.items():
+        for req_label, mapping in list(label_mapping.items()):
             if req_label == req_if["network"] and\
                mapping[0] != pool_if["network"]:
                 return False
             if mapping[0] == pool_if["network"] and\
                req_label != req_if["network"]:
                 return False
-        for param, value in req_if["params"].items():
+        for param, value in list(req_if["params"].items()):
             # skip empty parameters
             if len(value) == 0:
                 continue
@@ -652,7 +652,7 @@ class SetupMapper(object):
         mapping = {"machines": {}, "networks": {}, "virtual": False,
                    "pool_name": self._pool_name}
 
-        for req_label, label_map in self._net_label_mapping.items():
+        for req_label, label_map in list(self._net_label_mapping.items()):
             mapping["networks"][req_label] = label_map[0]
 
         for machine in self._machine_stack:

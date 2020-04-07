@@ -164,12 +164,12 @@ class MrouteTest:
         evifs = mroute["evifs"]
 
         # if ivif unresolved or pimreg, don't test
-        if ivif not in self.vif2port.keys() or self.vif2port[ivif] == "pimreg":
+        if ivif not in list(self.vif2port.keys()) or self.vif2port[ivif] == "pimreg":
             return
 
         source_port = self.vif2port[ivif]
         dest_ports = [self.vif2port[evif] for evif in evifs
-                      if evif in self.vif2port.keys()]
+                      if evif in list(self.vif2port.keys())]
 
         pimreg = False
         if "pimreg" in dest_ports:
@@ -206,7 +206,7 @@ class MrouteTest:
             self.test_fwd(mroute["group"], self.vif2port[mroute["ivif"]], [])
 
     def _random_evifs(self, ivif, starg):
-        vifs = self.vif2port.keys()
+        vifs = list(self.vif2port.keys())
         evifs = [evif for evif in vifs
                  if random.choice([True, False]) and evif != ivif]
         if starg:
@@ -214,7 +214,7 @@ class MrouteTest:
         return evifs
 
     def random_mroute_add(self, group, starg, ivif = None, test = True):
-        vifs = self.vif2port.keys()
+        vifs = list(self.vif2port.keys())
 
         if not ivif:
             ivif = random.choice(vifs)

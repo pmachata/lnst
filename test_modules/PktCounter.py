@@ -46,7 +46,7 @@ class PktCounter(TestGeneric):
             p_proto = "all"
             p_protodport = ""
         pttr = self._get_pttr(p_proto, p_indev_name, p_protodport)
-        data_stdout = self._iptables_exec("-L -v -x -n")[0]
+        data_stdout = self._iptables_exec("-L -v -x -n")[0].decode()
         match = re.search(pttr, data_stdout)
         if not match:
             return None
