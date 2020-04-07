@@ -232,7 +232,7 @@ class ShellProcess:
                 new_data = os.read(fd, 1024)
                 if not new_data:
                     return data
-                data += new_data
+                data += new_data.decode()
             else:
                 return data
 
