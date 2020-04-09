@@ -848,6 +848,7 @@ class SlaveMethods:
         prefix_re = "^((?:local )?" + "(?:%s|%s)" % (ip_re, ip6_re) + "(?:/\d{1,3})?)"
 
         # parse directly connected routes
+        route_output = route_output.decode()
         dc_route_re = prefix_re + " dev (\w+) (.*)"
         dc_matchs = re.findall(dc_route_re, route_output, re.M)
 
@@ -1323,7 +1324,7 @@ class ServerHandler(ConnectionHandler):
             self._s_socket.bind(addr)
             self._s_socket.listen(1)
         except socket.error as e:
-            logging.error(e[1])
+            logging.error(e)
             exit(1)
 
         self._netns = None
