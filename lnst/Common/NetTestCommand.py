@@ -347,11 +347,11 @@ class NetTestCommandGeneric(object):
         return formatted_data
 
     def _check_res_data(self, res_data):
-        name_start_char = ":A-Z_a-z\xC0-\xD6\xD8-\xF6\xF8-\u02FF"\
-                          "\u0370-\u037D\u037F-\u1FFF\u200C-\u200D"\
-                          "\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF"\
-                          "\uF900-\uFDCF\uFDF0-\uFFFD\U00010000-\U000EFFFF"
-        name_char = name_start_char + "\-\.0-9\xB7\u0300-\u036F\u203F-\u2040"
+        name_start_char = ":A-Z_a-z\xC0-\xD6\xD8-\xF6\xF8-\\u02FF"\
+                          "\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"\
+                          "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF"\
+                          "\\uF900-\\uFDCF\\uFDF0-\\uFFFD\\U00010000-\\U000EFFFF"
+        name_char = name_start_char + "\-\.0-9\xB7\\u0300-\\u036F\\u203F-\\u2040"
         name = "[%s]([%s])*$" % (name_start_char, name_char)
         char_data = "[^<&]*"
         if isinstance(res_data, dict):

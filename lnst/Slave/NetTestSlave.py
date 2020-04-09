@@ -43,6 +43,10 @@ from lnst.Slave.InterfaceManager import InterfaceManager
 from lnst.Slave.BridgeTool import BridgeTool
 from lnst.Slave.SlaveSecSocket import SlaveSecSocket, SecSocketException
 
+class SystemCallException(Exception):
+    """Exception used to handle SIGINT waiting for system calls"""
+    pass
+
 class SlaveMethods:
     '''
     Exported xmlrpc methods
@@ -1478,21 +1482,23 @@ class NetTestSlave:
                                             self._if_manager.get_nl_socket())
 
     def run(self):
-        while not self._finished:
-            if self._server_handler.get_ctl_sock() == None:
-                self._log_ctl.cancel_connection()
-                try:
-                    logging.info("Waiting for connection.")
-                    self._server_handler.accept_connection()
-                except (socket.error, SecSocketException):
-                    continue
-                self._log_ctl.set_connection(
-                                            self._server_handler.get_ctl_sock())
+        while True:
+            try:
+                if self._server_handler.get_ctl_sock() is None:
+                    self._log_ctl.cancel_connection()
+                    try:
+                        logging.info("Waiting for connection.")
+                        self._server_handler.accept_connection()
+                    except (socket.error, SecSocketException):
+                        continue
+                    self._log_ctl.set_connection(self._server_handler.get_ctl_sock())
 
-            msgs = self._server_handler.get_messages()
+                msgs = self._server_handler.get_messages()
 
-            for msg in msgs:
-                self._process_msg(msg[1])
+                for msg in msgs:
+                    self._process_msg(msg[1])
+            except SystemCallException:
+                break
 
         self._methods.machine_cleanup()
 
@@ -1593,7 +1599,7 @@ class NetTestSlave:
 
     def _signal_die_handler(self, signum, frame):
         logging.info("Caught signal %d -> dying" % signum)
-        self._finished = True
+        raise SystemCallException()
 
     def _parent_resend_signal_handler(self, signum, frame):
         logging.info("Caught signal %d -> resending to parent" % signum)

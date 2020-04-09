@@ -229,10 +229,10 @@ class ShellProcess:
             except:
                 return data
             if r and (r[0][1] & select.POLLIN):
-                new_data = os.read(fd, 1024)
+                new_data = os.read(fd, 1024).decode()
                 if not new_data:
                     return data
-                data += new_data.decode()
+                data += new_data
             else:
                 return data
 
