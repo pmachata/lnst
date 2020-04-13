@@ -39,7 +39,7 @@ def do_task(ctl, hosts, ifaces, aliases):
          encap_route(sw, vrf1, 2, g, ip=ipv4), \
          encap_route(sw, vrf1, 2, g, ip=ipv6):
 
-	sw.run("ip l set dev %s master %s" % (sw_if1.get_devname(), vrf1))
+        sw.run("ip l set dev %s master %s" % (sw_if1.get_devname(), vrf1))
         sw_if1.reset()
         add_forward_route(sw, vrf_None, "1.2.3.5")
         tl.wait_for_if(ifaces)
