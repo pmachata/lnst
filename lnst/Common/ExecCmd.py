@@ -55,7 +55,8 @@ def exec_cmd(cmd, die_on_err=True, log_outputs=True, report_stderr=False, json=F
     cmd = cmd.rstrip(" ")
     logging.debug("Executing: \"%s\"" % cmd)
     subp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, close_fds=True)
+                            stderr=subprocess.PIPE, close_fds=True,
+                            universal_newlines=True)
     (data_stdout, data_stderr) = subp.communicate()
 
     '''
@@ -64,9 +65,9 @@ def exec_cmd(cmd, die_on_err=True, log_outputs=True, report_stderr=False, json=F
     '''
     if log_outputs:
         if data_stdout:
-            log_output(logging.debug, "Stdout", data_stdout.decode())
+            log_output(logging.debug, "Stdout", data_stdout)
         if data_stderr:
-            log_output(logging.debug, "Stderr", data_stderr.decode())
+            log_output(logging.debug, "Stderr", data_stderr)
     if subp.returncode and die_on_err:
         err = ExecCmdFail(cmd, subp.returncode, [data_stdout, data_stderr], report_stderr)
         logging.error(err)

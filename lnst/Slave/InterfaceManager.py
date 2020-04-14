@@ -539,12 +539,12 @@ class Device(object):
 
         exec_cmd("tc qdisc del dev %s root" % self._name, die_on_err=False)
         out, _ = exec_cmd("tc filter show dev %s" % self._name)
-        ingress_handles = re.findall("ingress (\\d+):", out.decode())
+        ingress_handles = re.findall("ingress (\\d+):", out)
         for ingress_handle in ingress_handles:
             exec_cmd("tc qdisc del dev %s handle %s: ingress" %
                      (self._name, ingress_handle))
         out, _ = exec_cmd("tc qdisc show dev %s" % self._name)
-        ingress_qdiscs = re.findall("qdisc ingress (\\w+):", out.decode())
+        ingress_qdiscs = re.findall("qdisc ingress (\\w+):", out)
         if len(ingress_qdiscs) != 0:
                 exec_cmd("tc qdisc del dev %s ingress" % self._name)
 
@@ -557,7 +557,7 @@ class Device(object):
             return
 
         out, _ = exec_cmd("tc filter show dev %s" % self._name)
-        egress_prefs = re.findall("pref (\\d+) .* handle", out.decode())
+        egress_prefs = re.findall("pref (\\d+) .* handle", out)
 
         for egress_pref in egress_prefs:
             exec_cmd("tc filter del dev %s pref %s" % (self._name,
@@ -706,7 +706,7 @@ class Device(object):
         except:
             return {}
 
-        lines = iter(out.decode().split("\n"))
+        lines = iter(out.split("\n"))
         for line in lines:
             if (len(line.split()) == 0):
                 continue
@@ -740,7 +740,7 @@ class Device(object):
             out, _ = exec_cmd("ifstat -x c %s" % self._name)
         except:
             return {}
-        lines = iter(out.decode().split("\n"))
+        lines = iter(out.split("\n"))
         line_first = ""
         line_decond = ""
         for line in lines:
@@ -829,7 +829,7 @@ class Device(object):
             r"(?P<backlog>\d+\w?)b.*\n.*?marked (?P<marked>\d+) early " \
             r"(?P<early>\d+) pdrop (?P<pdrop>\d+)" % parent
         red_pattern = re.compile(p, re.MULTILINE)
-        stats_raw = red_pattern.search(out.decode())
+        stats_raw = red_pattern.search(out)
         if not stats_raw:
             return {}
 
@@ -937,7 +937,7 @@ class Device(object):
         if self._ifi_type == 772:  #loopback ifi type
             return 'loopback'
         out, _ = exec_cmd("ethtool -i %s" % self._name, False, False, False)
-        match = re.search("^driver: (.*)$", out.decode(), re.MULTILINE)
+        match = re.search("^driver: (.*)$", out, re.MULTILINE)
         if match is not None:
             return match.group(1)
         else:

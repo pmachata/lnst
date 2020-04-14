@@ -526,8 +526,7 @@ class SlaveMethods:
         logging.info("Restoring system configuration")
         for option, values in list(self._system_config.items()):
             try:
-                cmd_str = "echo \"%s\" >%s" % (values["initial_val"].decode(),
-                                               option)
+                cmd_str = "echo \"%s\" >%s" % (values["initial_val"], option)
                 (stdout, stderr) = exec_cmd(cmd_str)
             except ExecCmdFail:
                 logging.warn("Unable to restore '%s' config option!", option)
