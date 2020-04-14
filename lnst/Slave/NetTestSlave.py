@@ -779,9 +779,9 @@ class SlaveMethods:
 
                 #map network sysfs to new net
                 libc.unshare(CLONE_NEWNS)
-                libc.mount("", "/", "none", MS_SLAVE | MS_REC, 0)
-                libc.umount2("/sys", MNT_DETACH)
-                libc.mount(netns, "/sys", "sysfs", 0, 0)
+                libc.mount(b"", b"/", b"none", MS_SLAVE | MS_REC, 0)
+                libc.umount2(b"/sys", MNT_DETACH)
+                libc.mount(netns.encode(), b"/sys", b"sysfs", 0, 0)
 
                 #set ctl socket to pipe to main netns
                 self._server_handler.close_s_sock()
