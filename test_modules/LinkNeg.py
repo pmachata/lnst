@@ -16,7 +16,7 @@ from pyroute2 import IPDB
 
 class LinkNeg(TestGeneric):
     def get_speed(self, iface):
-        data_stdout = exec_cmd("ethtool %s" % iface)[0].decode()
+        data_stdout = exec_cmd("ethtool %s" % iface)[0]
         match = re.search('Speed: ([0-9]*)', data_stdout)
         return 0 if match is None else int(match.group(1))
 

@@ -152,7 +152,7 @@ class BridgeTool:
         return self._add_del_mdb("del", br_mdb_info)
 
     def show_mdb(self):
-        return exec_cmd("bridge mdb show dev %s" % self._dev_name)[0].decode()
+        return exec_cmd("bridge mdb show dev %s" % self._dev_name)[0]
 
     def _set_link(self, attr, br_link_info):
         cmd = "bridge link set dev %s %s" % (self._dev_name, attr)
