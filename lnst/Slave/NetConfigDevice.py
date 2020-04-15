@@ -349,7 +349,7 @@ class NetConfigDeviceVlan(NetConfigDeviceGeneric):
 
     def _check_ip_link_add(self):
         output = exec_cmd("ip link help", die_on_err=False,
-                          log_outputs=False)[1].decode()
+                          log_outputs=False)[1]
         for line in output.split("\n"):
             if re.match(r'^.*ip link add [\[]{0,1}link.*$', line):
                 return True
