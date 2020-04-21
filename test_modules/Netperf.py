@@ -8,10 +8,15 @@ jprochaz@redhat.com (Jiri Prochazka)
 
 import logging
 import errno
+import signal
 import re
 from lnst.Common.TestsCommon import TestGeneric
 from lnst.Common.ShellProcess import ShellProcess
 from lnst.Common.Utils import std_deviation, is_installed, int_it
+
+class InterruptException(Exception):
+    """Exception used to handle SIGINT waiting"""
+    pass
 
 class Netperf(TestGeneric):
 
@@ -384,10 +389,21 @@ class Netperf(TestGeneric):
         logging.debug("running as server...")
         server = ShellProcess(cmd)
         try:
-            server.wait()
-        except OSError as e:
-            if e.errno == errno.EINTR:
-                server.kill()
+            self.wait_for_interrupt()
+        except InterruptException:
+            server.kill()
+
+    def wait_for_interrupt(self):
+        def handler(signum, frame):
+            raise InterruptException()
+
+        try:
+            old_handler = signal.signal(signal.SIGINT, handler)
+            signal.pause()
+        except InterruptException:
+            pass
+        finally:
+            signal.signal(signal.SIGINT, old_handler)
 
     def _pretty_rate(self, rate, unit=None):
         pretty_rate = {}

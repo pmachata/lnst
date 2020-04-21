@@ -7,6 +7,7 @@ jtluka@redhat.com (Jan Tluka)
 """
 
 import logging
+import signal
 import time
 import errno
 import re
@@ -14,6 +15,10 @@ from lnst.Common.TestsCommon import TestGeneric
 from lnst.Common.ExecCmd import exec_cmd
 from lnst.Common.ShellProcess import ShellProcess
 from lnst.Common.Utils import is_installed
+
+class InterruptException(Exception):
+    """Exception used to handle SIGINT waiting"""
+    pass
 
 class Iperf(TestGeneric):
     def _compose_iperf_cmd(self, role):
@@ -124,12 +129,23 @@ class Iperf(TestGeneric):
             server.kill()
         else:
             try:
-                server.wait()
-            except OSError as e:
-                if e.errno == errno.EINTR:
-                     server.kill()
+                self.wait_for_interrupt()
+            except InterruptException:
+                server.kill()
 
             server.read_nonblocking()
+
+    def wait_for_interrupt(self):
+        def handler(signum, frame):
+            raise InterruptException()
+
+        try:
+            old_handler = signal.signal(signal.SIGINT, handler)
+            signal.pause()
+        except InterruptException:
+            pass
+        finally:
+            signal.signal(signal.SIGINT, old_handler)
 
     def run(self):
         self._keep_server_running = True
