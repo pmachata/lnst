@@ -43,8 +43,8 @@ class Machine(object):
 
     def sysctl_set(self):
         self.sysctl_orig = {}
-        output = self.machine.run("sysctl -ar '\\brp_filter'")
-        for line in output.out().split('\n'):
+        proc = self.machine.run("sysctl -ar '\\brp_filter'")
+        for line in proc.out().split('\n'):
             fields = line.split(" = ")
             if len(fields) > 1:
                 key, value = fields
@@ -57,8 +57,9 @@ class Machine(object):
 
     def is_supported_speed(self, speed):
         for iface in self.ifaces:
-            output = self.machine.run("ethtool %s" % iface.get_devname())
-            supported_speeds = output.out()[output.out().find("Supported link modes"):]
+            proc = self.machine.run("ethtool %s" % iface.get_devname())
+            output = proc.out()
+            supported_speeds = output[output.find("Supported link modes"):]
             supported_speeds = supported_speeds[:supported_speeds.find("Advertised link modes")]
             speed += 'base'
             if speed not in supported_speeds:
@@ -178,7 +179,7 @@ class PtpTest(object):
             machine_obj.configure(transport)
 
     def get_param_value(self, cmd_out, param):
-        for line in cmd_out.out().split('\n\t'):
+        for line in cmd_out.split('\n\t'):
             fields = line.split()
             # if param is the first word in this line,
             # return the value of this param.
@@ -188,8 +189,9 @@ class PtpTest(object):
         raise RuntimeError("%s not found in pmc output" % param)
 
     def check_offset(self, machine, uds_address):
-        output = machine.run("pmc -u -b 0 -s %s 'GET TIME_STATUS_NP'" % \
+        proc = machine.run("pmc -u -b 0 -s %s 'GET TIME_STATUS_NP'" % \
                             uds_address)
+        output = proc.out()
         offset = self.get_param_value(cmd_out=output, param='master_offset')
         offset = abs(int(offset))
 
@@ -224,8 +226,9 @@ class PtpTest(object):
             desired_hops = machine_obj.get_desired_hops()
             machine_name = machine_obj.get_machine_name()
 
-            output = m.run("pmc -u -b 0 -s %s 'GET CURRENT_DATA_SET'" % \
-                        uds_address)
+            proc = m.run("pmc -u -b 0 -s %s 'GET CURRENT_DATA_SET'" % \
+                         uds_address)
+            output = proc.out()
             hops = self.get_param_value(cmd_out=output, param='stepsRemoved')
 
             if not int(hops) == desired_hops:
