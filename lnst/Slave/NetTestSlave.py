@@ -775,13 +775,14 @@ class SlaveMethods:
                 f = os.open(netns_path, os.O_RDONLY | os.O_CREAT | os.O_EXCL, 0)
                 os.close(f)
                 libc.unshare(CLONE_NEWNET)
-                libc.mount("/proc/self/ns/net", netns_path, "none", MS_BIND, 0)
+                libc.mount(b"/proc/self/ns/net", netns_path.encode(),
+                           b"none", MS_BIND, 0)
 
                 #map network sysfs to new net
                 libc.unshare(CLONE_NEWNS)
-                libc.mount("", "/", "none", MS_SLAVE | MS_REC, 0)
-                libc.umount2("/sys", MNT_DETACH)
-                libc.mount(netns, "/sys", "sysfs", 0, 0)
+                libc.mount(b"", b"/", b"none", MS_SLAVE | MS_REC, 0)
+                libc.umount2(b"/sys", MNT_DETACH)
+                libc.mount(netns.encode(), b"/sys", b"sysfs", 0, 0)
 
                 #set ctl socket to pipe to main netns
                 self._server_handler.close_s_sock()
@@ -822,7 +823,7 @@ class SlaveMethods:
 
             # Remove named namespace
             try:
-                libc.umount2(netns_path, MNT_DETACH)
+                libc.umount2(netns_path.encode(), MNT_DETACH)
                 os.unlink(netns_path)
             except:
                 logging.warning("Unable to remove named namespace %s." % netns_path)
